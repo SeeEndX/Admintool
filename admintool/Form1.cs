@@ -32,7 +32,7 @@ namespace admintool
 
             if (group == "admin")
             {
-                File.CreateText(@"C:\1.txt");
+                //File.CreateText(@"C:\1.txt");
             }
             else if (group == "prog")
             {
@@ -48,6 +48,12 @@ namespace admintool
         private void ListOfActions()
         {
 
+        }
+
+        private void AdminPanel()
+        {
+            Form1 form = new Form1();
+            form.ShowDialog();
         }
 
         private void button1_Click(object sender, EventArgs e)
