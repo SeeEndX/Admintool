@@ -35,7 +35,7 @@ namespace admintool
             this.btnEdit = new System.Windows.Forms.Button();
             this.btnRemove = new System.Windows.Forms.Button();
             this.dgvUsers = new System.Windows.Forms.DataGridView();
-            this.isSelected = new System.Windows.Forms.DataGridViewCheckBoxColumn();
+            this.chbChoice = new System.Windows.Forms.DataGridViewCheckBoxColumn();
             ((System.ComponentModel.ISupportInitialize)(this.dgvUsers)).BeginInit();
             this.SuspendLayout();
             // 
@@ -86,7 +86,7 @@ namespace admintool
             this.dgvUsers.BackgroundColor = System.Drawing.SystemColors.ButtonHighlight;
             this.dgvUsers.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dgvUsers.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
-            this.isSelected});
+            this.chbChoice});
             this.dgvUsers.Location = new System.Drawing.Point(54, 44);
             this.dgvUsers.Name = "dgvUsers";
             this.dgvUsers.ReadOnly = true;
@@ -94,15 +94,18 @@ namespace admintool
             this.dgvUsers.RowTemplate.Height = 28;
             this.dgvUsers.Size = new System.Drawing.Size(637, 264);
             this.dgvUsers.TabIndex = 5;
+            this.dgvUsers.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvUsers_CellContentClick);
             // 
-            // isSelected
+            // chbChoice
             // 
-            this.isSelected.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
-            this.isSelected.HeaderText = "Выбрано";
-            this.isSelected.MinimumWidth = 8;
-            this.isSelected.Name = "isSelected";
-            this.isSelected.ReadOnly = true;
-            this.isSelected.Width = 82;
+            this.chbChoice.FalseValue = "False";
+            this.chbChoice.HeaderText = "Выбор";
+            this.chbChoice.MinimumWidth = 8;
+            this.chbChoice.Name = "chbChoice";
+            this.chbChoice.ReadOnly = true;
+            this.chbChoice.Resizable = System.Windows.Forms.DataGridViewTriState.False;
+            this.chbChoice.TrueValue = "True";
+            this.chbChoice.Width = 60;
             // 
             // AdminForm
             // 
@@ -130,7 +133,7 @@ namespace admintool
         private System.Windows.Forms.Button btnEdit;
         private System.Windows.Forms.Button btnRemove;
         private System.Windows.Forms.DataGridView dgvUsers;
-        private DataGridViewCheckBoxColumn isSelected;
+        private DataGridViewCheckBoxColumn chbChoice;
     }
 }
 

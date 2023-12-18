@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Data.Entity.Core.Common.CommandTrees.ExpressionBuilder;
 using System.Data.SQLite;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace admintool
@@ -37,6 +39,11 @@ GROUP BY Users.login;";
                     dgvUsers.DataSource = dataTable;
                     dgvUsers.Columns["Доступные функции"].AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
                     dgvUsers.Columns["id"].AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
+                    dgvUsers.Columns["id"].Frozen = true;
+                    dgvUsers.Columns["Доступные функции"].Frozen = true;
+                    dgvUsers.Columns["Пользователь"].Frozen = true;
+
+                    con.Close();
                     return dataTable;
                 }
             }
@@ -60,7 +67,7 @@ GROUP BY Users.login;";
             AddUserForm addUserForm = new AddUserForm();
             addUserForm.Tag = this;
             addUserForm.FormClosed += (sender, e) => this.Enabled = true;
-            addUserForm.DataAdded += (sender, e) => 
+            addUserForm.DataAdded += (sender, e) =>
                 dgvUsers.DataSource = getDataTable(cmdText);
             addUserForm.Show(this);
             this.Enabled = false;
@@ -73,37 +80,97 @@ GROUP BY Users.login;";
 
         private void btnRemove_Click(object sender, EventArgs e)
         {
-            if (dgvUsers.SelectedCells.Count > 0)
+            bool containsCheckboxCell = false;
+
+            foreach (DataGridViewCell cell in dgvUsers.SelectedCells)
             {
-                int rowIndex = dgvUsers.SelectedCells[0].RowIndex;
-                DataTable dataTable = getDataTable(cmdText);
-
-                if (rowIndex >= 0 && rowIndex < dataTable.Rows.Count)
+                if (cell.OwningColumn.Name == "chbChoice")
                 {
-                    int userId = Convert.ToInt32(dataTable.Rows[rowIndex]["id"]);
+                    containsCheckboxCell = true;
+                    break;
+                }
+            }
 
-                    DeleteUserById(userId);
+            if (containsCheckboxCell)
+            {
+                DeleteSelectedRows();
+            }
+            else
+            {
+                DeleteSelectedCells();
+            }
+        }
 
-                    dataTable.Rows.RemoveAt(rowIndex);
+        private void DeleteSelectedRows()
+        {
+            for (int i = 0; i < dgvUsers.Rows.Count; i++)
+            {
+                DataGridViewRow row = dgvUsers.Rows[i];
+                DataGridViewCheckBoxCell checkbox = row.Cells["chbChoice"] as DataGridViewCheckBoxCell;
 
-                    dgvUsers.DataSource = null;
-                    dgvUsers.DataSource = dataTable;
+                if (Convert.ToBoolean(checkbox?.Value))
+                {
+                    int userId = Convert.ToInt32(row.Cells["id"].Value);
+
+                    string deleteQuery = "DELETE FROM Users WHERE id = @UserId";
+                    using (con = new SQLiteConnection(cs))
+                    {
+                        con.Open();
+
+                        using (SQLiteCommand cmd = new SQLiteCommand(deleteQuery, con))
+                        {
+                            cmd.Parameters.AddWithValue("@UserId", userId);
+                            cmd.ExecuteNonQuery();
+                        }
+                    }
+
+                    dgvUsers.Rows.RemoveAt(i);
+                    i--;
                 }
             }
         }
 
-        private void DeleteUserById(int userId)
+        private void DeleteSelectedCells()
         {
-            using (SQLiteConnection con = new SQLiteConnection(cs))
+            if (dgvUsers.SelectedCells.Count > 0)
             {
-                con.Open();
+                int rowIndex = dgvUsers.SelectedCells[0].RowIndex;
 
-                string deleteQuery = "DELETE FROM Users WHERE id = @UserId";
-                using (SQLiteCommand cmd = new SQLiteCommand(deleteQuery, con))
+                if (rowIndex >= 0 && rowIndex < dgvUsers.Rows.Count)
                 {
-                    cmd.Parameters.AddWithValue("@UserId", userId);
-                    cmd.ExecuteNonQuery();
+                    int userId = Convert.ToInt32(dgvUsers.Rows[rowIndex].Cells["id"].Value);
+
+                    string deleteQuery = "DELETE FROM Users WHERE id = @UserId";
+
+                    using (SQLiteConnection con = new SQLiteConnection(cs))
+                    {
+                        con.Open();
+
+                        using (SQLiteCommand cmd = new SQLiteCommand(deleteQuery, con))
+                        {
+                            cmd.Parameters.AddWithValue("@UserId", userId);
+                            cmd.ExecuteNonQuery();
+                        }
+                    }
+
+                    dgvUsers.Rows.RemoveAt(rowIndex);
                 }
+            }
+        }
+
+
+        private void dgvUsers_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.ColumnIndex == dgvUsers.Columns["chbChoice"].Index && e.RowIndex >= 0)
+            {
+                DataGridViewCheckBoxCell checkboxCell = dgvUsers.Rows[e.RowIndex].Cells["chbChoice"] as DataGridViewCheckBoxCell;
+
+                if (checkboxCell != null)
+                {
+                    checkboxCell.Value = checkboxCell.Value == null || !(bool)checkboxCell.Value;
+                    dgvUsers.EndEdit();
+                }
+
             }
         }
     }
