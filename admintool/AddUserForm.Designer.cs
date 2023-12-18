@@ -131,6 +131,7 @@
             this.btnBack.TabIndex = 11;
             this.btnBack.Text = "Назад";
             this.btnBack.UseVisualStyleBackColor = true;
+            this.btnBack.Click += new System.EventHandler(this.btnBack_Click);
             // 
             // AddUserForm
             // 

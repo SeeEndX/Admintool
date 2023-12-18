@@ -75,29 +75,52 @@ GROUP BY Users.login;";
 
         private void btnEdit_Click(object sender, EventArgs e)
         {
-            dgvUsers.Refresh();
+            
+            
+                OpenEditUserForm();
+        }
+
+        private void OpenEditUserForm()
+        {
+            if (dgvUsers.SelectedCells.Count > 0)
+            {
+                int rowIndex = dgvUsers.SelectedCells[0].RowIndex;
+                string selectedUsername = dgvUsers.Rows[rowIndex].Cells["Пользователь"].Value.ToString();
+
+                EditUserForm editUserForm = new EditUserForm(selectedUsername);
+                editUserForm.Tag = this;
+                editUserForm.FormClosed += (sender, e) => this.Enabled = true;
+                editUserForm.DataUpdated += (sender, e) => dgvUsers.DataSource = getDataTable(cmdText);
+                editUserForm.Show(this);
+                this.Enabled = false;
+            }
+            else
+            {
+                MessageBox.Show("Выберите пользователя для редактирования.");
+            }
         }
 
         private void btnRemove_Click(object sender, EventArgs e)
         {
             bool containsCheckboxCell = false;
 
-            foreach (DataGridViewCell cell in dgvUsers.SelectedCells)
+            DialogResult result = MessageBox.Show("Вы уверены, " +
+                "что хотите удалить выбранных пользователей?", 
+                "Подтверждение удаления", MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question);
+            if (result == DialogResult.Yes)
             {
-                if (cell.OwningColumn.Name == "chbChoice")
+                foreach (DataGridViewCell cell in dgvUsers.SelectedCells)
                 {
-                    containsCheckboxCell = true;
-                    break;
+                    if (cell.OwningColumn.Name == "chbChoice")
+                    {
+                        containsCheckboxCell = true;
+                        break;
+                    }
                 }
-            }
 
-            if (containsCheckboxCell)
-            {
-                DeleteSelectedRows();
-            }
-            else
-            {
-                DeleteSelectedCells();
+                if (containsCheckboxCell) DeleteSelectedRows();
+                else DeleteSelectedCells();
             }
         }
 
@@ -157,7 +180,6 @@ GROUP BY Users.login;";
                 }
             }
         }
-
 
         private void dgvUsers_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {

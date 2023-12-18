@@ -89,5 +89,10 @@ namespace admintool
             tbPass.Text = "";
             tbPass2.Text = "";
         }
+
+        private void btnBack_Click(object sender, EventArgs e)
+        {
+            Close();
+        }
     }
 }
