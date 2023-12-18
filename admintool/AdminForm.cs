@@ -10,27 +10,34 @@ using System.Net.Security;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Data.SQLite;
 
 namespace admintool
 {
     public partial class AdminForm : Form
     {
         private List<User> userList;
+        private string path = "AdminToolDB.db";
+        private string cs = @"URI=file:G:\\4kurs\\ПИС\\admintool\\AdminToolDB.db";
+        SQLiteConnection con;
+        SQLiteCommand cmd;
 
         public AdminForm()
         {
-            
-            userList = new List<User>
-            {
-                new User { Id = 1, Name = "Пользователь 1", Functions = new List<string> { "Функция 1", "Функция 2" } },
-                new User { Id = 2, Name = "Пользователь 2", Functions = new List<string> { "Функция 3", "Функция 4" } },
-            };
             InitializeComponent();
-            foreach (var user in userList)
-            {
-                string functionsString = string.Join(", ", user.Functions);
-                dgvUsers.Rows.Add(user.Name, functionsString);
-            }
+            FillUsers();
+        }
+
+        private void FillUsers()
+        {
+            string cmdText = @"
+SELECT Users.login, GROUP_CONCAT(Function.name, ', ') AS 'Доступные функции'
+FROM Function_users
+JOIN Users ON Users.id = Function_users.user
+JOIN Function ON Function.id = Function_users.function
+GROUP BY Users.login;";
+
+            SqlQuery(cmdText);
         }
 
         /*структура БД:
@@ -43,19 +50,25 @@ namespace admintool
             {
                 User selectedUser = (User)dgvUsers.Rows[e.RowIndex].DataBoundItem;
 
-                //форма редактирования
-                /*EditFunctionsForm editFuncti1onsForm = new EditFunctionsForm(selectedUser);
-                editFunctionsForm.ShowDialog();*/
-
-                //обновление данных после изменения
                 dgvUsers.Refresh();
             }
         }
 
-/*        private void ListOfActions()
+        private void SqlQuery(string cmdText)
         {
+            using (con = new SQLiteConnection(cs))
+            {
+                con.Open();
 
-        }*/
+                using (SQLiteDataAdapter adapter = new SQLiteDataAdapter(cmdText, con))
+                {
+                    DataTable dataTable = new DataTable();
+                    adapter.Fill(dataTable);
+
+                    dgvUsers.DataSource = dataTable;
+                }
+            }
+        }
 
 
         private void button1_Click(object sender, EventArgs e)
@@ -73,22 +86,7 @@ namespace admintool
 
         private void button3_Click(object sender, EventArgs e)
         {
-
-            foreach (DataGridViewRow row in dgvUsers.SelectedRows)
-            {
-                string name = Convert.ToString(row.Cells[0].Value);
-                User userToRemove = userList.Find(u => u.Name == name);
-                userList.Remove(userToRemove);
-            }
-
-            // Обновление DataGridView после удаления записей
-            dgvUsers.Rows.Clear();
-            foreach (var user in userList)
-            {
-                string functionsString = string.Join(", ", user.Functions);
-                dgvUsers.Rows.Add(user.Name, functionsString);
-                dgvUsers.Rows[dgvUsers.Rows.Count - 1].Cells["login"].Value = user.Name;
-            }
+            
         }
     }
 

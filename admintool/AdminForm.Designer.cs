@@ -35,10 +35,8 @@ namespace admintool
             this.button2 = new System.Windows.Forms.Button();
             this.button3 = new System.Windows.Forms.Button();
             this.dgvUsers = new System.Windows.Forms.DataGridView();
-            this.login = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Funct = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Actions = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.isSelected = new System.Windows.Forms.DataGridViewCheckBoxColumn();
+            this.login = new System.Windows.Forms.DataGridViewTextBoxColumn();
             ((System.ComponentModel.ISupportInitialize)(this.dgvUsers)).BeginInit();
             this.SuspendLayout();
             // 
@@ -88,10 +86,8 @@ namespace admintool
             this.dgvUsers.BackgroundColor = System.Drawing.SystemColors.ButtonHighlight;
             this.dgvUsers.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dgvUsers.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
-            this.login,
-            this.Funct,
-            this.Actions,
-            this.isSelected});
+            this.isSelected,
+            this.login});
             this.dgvUsers.Location = new System.Drawing.Point(54, 44);
             this.dgvUsers.Name = "dgvUsers";
             this.dgvUsers.ReadOnly = true;
@@ -99,6 +95,14 @@ namespace admintool
             this.dgvUsers.RowTemplate.Height = 28;
             this.dgvUsers.Size = new System.Drawing.Size(673, 264);
             this.dgvUsers.TabIndex = 5;
+            // 
+            // isSelected
+            // 
+            this.isSelected.HeaderText = "Выбрано";
+            this.isSelected.MinimumWidth = 8;
+            this.isSelected.Name = "isSelected";
+            this.isSelected.ReadOnly = true;
+            this.isSelected.Width = 60;
             // 
             // login
             // 
@@ -108,32 +112,6 @@ namespace admintool
             this.login.Name = "login";
             this.login.ReadOnly = true;
             this.login.Width = 130;
-            // 
-            // Funct
-            // 
-            this.Funct.DataPropertyName = "funct";
-            this.Funct.HeaderText = "Доступные функции";
-            this.Funct.MinimumWidth = 8;
-            this.Funct.Name = "Funct";
-            this.Funct.ReadOnly = true;
-            this.Funct.Width = 130;
-            // 
-            // Actions
-            // 
-            this.Actions.DataPropertyName = "Actions";
-            this.Actions.HeaderText = "Последние действия";
-            this.Actions.MinimumWidth = 8;
-            this.Actions.Name = "Actions";
-            this.Actions.ReadOnly = true;
-            this.Actions.Width = 130;
-            // 
-            // isSelected
-            // 
-            this.isSelected.HeaderText = "Выбрано";
-            this.isSelected.MinimumWidth = 8;
-            this.isSelected.Name = "isSelected";
-            this.isSelected.ReadOnly = true;
-            this.isSelected.Width = 150;
             // 
             // AdminForm
             // 
@@ -160,10 +138,8 @@ namespace admintool
         private System.Windows.Forms.Button button2;
         private System.Windows.Forms.Button button3;
         private System.Windows.Forms.DataGridView dgvUsers;
-        private DataGridViewTextBoxColumn login;
-        private DataGridViewTextBoxColumn Funct;
-        private DataGridViewTextBoxColumn Actions;
         private DataGridViewCheckBoxColumn isSelected;
+        private DataGridViewTextBoxColumn login;
     }
 }
 
