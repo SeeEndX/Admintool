@@ -32,7 +32,7 @@ namespace admintool
             con = new SQLiteConnection(cs);
             con.Open();
 
-            var group = SqlQuery("SELECT [group] FROM Users WHERE login = " +
+            var group = SqlQuery("SELECT [usergroup] FROM Users WHERE login = " +
                 "@Login AND password = @Password", con, login, password);
             if (group != null)
             {

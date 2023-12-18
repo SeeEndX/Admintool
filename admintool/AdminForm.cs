@@ -1,22 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
-using System.Drawing;
-using System.Drawing.Text;
-using System.IO;
-using System.Linq;
-using System.Net.Security;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
 using System.Data.SQLite;
+using System.Windows.Forms;
 
 namespace admintool
 {
     public partial class AdminForm : Form
     {
-        private List<User> userList;
         private string path = "AdminToolDB.db";
         private string cs = @"URI=file:G:\\4kurs\\ПИС\\admintool\\AdminToolDB.db";
         SQLiteConnection con;
@@ -38,12 +29,9 @@ JOIN Function ON Function.id = Function_users.function
 GROUP BY Users.login;";
 
             SqlQuery(cmdText);
+            dgvUsers.Columns["Доступные функции"].AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
         }
 
-        /*структура БД:
-        table Users: id, login, pass
-        table Groups: id, id_U, group_name
-         */
         private void dgwUsers_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.ColumnIndex == dgvUsers.Columns["Functions"].Index && e.RowIndex >= 0)
@@ -70,12 +58,6 @@ GROUP BY Users.login;";
             }
         }
 
-
-        private void button1_Click(object sender, EventArgs e)
-        {
-            
-        }
-
         private void btnLogout_Click(object sender, EventArgs e)
         {
             AuthForm auth = new AuthForm();
@@ -84,10 +66,20 @@ GROUP BY Users.login;";
             Hide();
         }
 
-        private void button3_Click(object sender, EventArgs e)
+        private void btnAdd_Click(object sender, EventArgs e)
         {
-            
+            OpenAddUserForm();
         }
+
+        private void OpenAddUserForm()
+        {
+            AddUserForm addUserForm = new AddUserForm();
+            addUserForm.Tag = this;
+            addUserForm.FormClosed += (sender, e) => this.Enabled = true;
+            addUserForm.Show(this);
+            this.Enabled = false;
+        }
+
     }
 
     public class User

@@ -98,6 +98,7 @@
             this.Controls.Add(this.funcLB);
             this.Controls.Add(this.lbHello);
             this.Name = "ProgForm";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "ProgForm";
             this.ResumeLayout(false);
             this.PerformLayout();
