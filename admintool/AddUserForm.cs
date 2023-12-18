@@ -11,6 +11,8 @@ namespace admintool
         private string cs = @"URI=file:G:\\4kurs\\ПИС\\admintool\\AdminToolDB.db";
         SQLiteConnection con;
         SQLiteCommand cmd;
+
+        public event EventHandler DataAdded;
         public AddUserForm()
         {
             con = new SQLiteConnection(cs);
@@ -37,12 +39,18 @@ namespace admintool
                 {
                     MessageBox.Show("Пользователь успешно добавлен.", "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     ClearFields();
+                    OnDataAdded();
                 }
             }
             else
             {
                 MessageBox.Show("Заполните все поля!", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+        }
+
+        protected virtual void OnDataAdded()
+        {
+            DataAdded?.Invoke(this, EventArgs.Empty);
         }
 
         private bool IsUserExists(string login)
