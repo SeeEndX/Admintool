@@ -21,28 +21,26 @@ namespace admintool
 
         private void FillUsers()
         {
-            string cmdText = @"
+            /*string cmdText = @"
 SELECT Users.login, GROUP_CONCAT(Function.name, ', ') AS 'Доступные функции'
 FROM Function_users
 JOIN Users ON Users.id = Function_users.user
 JOIN Function ON Function.id = Function_users.function
+GROUP BY Users.login;";*/
+
+            string cmdText = @"
+SELECT Users.login, GROUP_CONCAT(Function.name, ', ') AS 'Доступные функции'
+FROM Users
+LEFT JOIN Function_users ON Users.id = Function_users.user
+LEFT JOIN Function ON Function.id = Function_users.function
+WHERE Users.usergroup = 'Dev'
 GROUP BY Users.login;";
 
-            SqlQuery(cmdText);
+            getDataTable(cmdText);
             dgvUsers.Columns["Доступные функции"].AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
         }
 
-        private void dgwUsers_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
-        {
-            if (e.ColumnIndex == dgvUsers.Columns["Functions"].Index && e.RowIndex >= 0)
-            {
-                User selectedUser = (User)dgvUsers.Rows[e.RowIndex].DataBoundItem;
-
-                dgvUsers.Refresh();
-            }
-        }
-
-        private void SqlQuery(string cmdText)
+        private DataTable getDataTable(string cmdText)
         {
             using (con = new SQLiteConnection(cs))
             {
@@ -54,6 +52,7 @@ GROUP BY Users.login;";
                     adapter.Fill(dataTable);
 
                     dgvUsers.DataSource = dataTable;
+                    return dataTable;
                 }
             }
         }
@@ -73,13 +72,32 @@ GROUP BY Users.login;";
 
         private void OpenAddUserForm()
         {
+            string cmdText = @"
+SELECT Users.login, GROUP_CONCAT(Function.name, ', ') AS 'Доступные функции'
+FROM Users
+LEFT JOIN Function_users ON Users.id = Function_users.user
+LEFT JOIN Function ON Function.id = Function_users.function
+WHERE Users.usergroup = 'Dev'
+GROUP BY Users.login;";
+
             AddUserForm addUserForm = new AddUserForm();
             addUserForm.Tag = this;
             addUserForm.FormClosed += (sender, e) => this.Enabled = true;
+            addUserForm.DataAdded += (sender, e) => 
+                dgvUsers.DataSource = getDataTable(cmdText);
             addUserForm.Show(this);
             this.Enabled = false;
         }
 
+        private void btnEdit_Click(object sender, EventArgs e)
+        {
+            dgvUsers.Refresh();
+        }
+
+        private void btnRemove_Click(object sender, EventArgs e)
+        {
+
+        }
     }
 
     public class User
