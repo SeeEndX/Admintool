@@ -8,36 +8,20 @@ namespace admintool
 {
     public partial class AdminForm : Form
     {
-        private string path = "AdminToolDB.db";
         private string cs = @"URI=file:G:\\4kurs\\ПИС\\admintool\\AdminToolDB.db";
         SQLiteConnection con;
-        SQLiteCommand cmd;
-
-        public AdminForm()
-        {
-            InitializeComponent();
-            FillUsers();
-        }
-
-        private void FillUsers()
-        {
-            /*string cmdText = @"
-SELECT Users.login, GROUP_CONCAT(Function.name, ', ') AS 'Доступные функции'
-FROM Function_users
-JOIN Users ON Users.id = Function_users.user
-JOIN Function ON Function.id = Function_users.function
-GROUP BY Users.login;";*/
-
-            string cmdText = @"
-SELECT Users.login, GROUP_CONCAT(Function.name, ', ') AS 'Доступные функции'
+        private string cmdText = @"
+SELECT Users.id AS 'id', Users.login AS 'Пользователь', GROUP_CONCAT(Function.name, ', ') AS 'Доступные функции'
 FROM Users
 LEFT JOIN Function_users ON Users.id = Function_users.user
 LEFT JOIN Function ON Function.id = Function_users.function
 WHERE Users.usergroup = 'Dev'
 GROUP BY Users.login;";
 
+        public AdminForm()
+        {
+            InitializeComponent();
             getDataTable(cmdText);
-            dgvUsers.Columns["Доступные функции"].AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
         }
 
         private DataTable getDataTable(string cmdText)
@@ -50,8 +34,9 @@ GROUP BY Users.login;";
                 {
                     DataTable dataTable = new DataTable();
                     adapter.Fill(dataTable);
-
                     dgvUsers.DataSource = dataTable;
+                    dgvUsers.Columns["Доступные функции"].AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
+                    dgvUsers.Columns["id"].AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
                     return dataTable;
                 }
             }
@@ -72,14 +57,6 @@ GROUP BY Users.login;";
 
         private void OpenAddUserForm()
         {
-            string cmdText = @"
-SELECT Users.login, GROUP_CONCAT(Function.name, ', ') AS 'Доступные функции'
-FROM Users
-LEFT JOIN Function_users ON Users.id = Function_users.user
-LEFT JOIN Function ON Function.id = Function_users.function
-WHERE Users.usergroup = 'Dev'
-GROUP BY Users.login;";
-
             AddUserForm addUserForm = new AddUserForm();
             addUserForm.Tag = this;
             addUserForm.FormClosed += (sender, e) => this.Enabled = true;
@@ -96,38 +73,38 @@ GROUP BY Users.login;";
 
         private void btnRemove_Click(object sender, EventArgs e)
         {
+            if (dgvUsers.SelectedCells.Count > 0)
+            {
+                int rowIndex = dgvUsers.SelectedCells[0].RowIndex;
+                DataTable dataTable = getDataTable(cmdText);
 
+                if (rowIndex >= 0 && rowIndex < dataTable.Rows.Count)
+                {
+                    int userId = Convert.ToInt32(dataTable.Rows[rowIndex]["id"]);
+
+                    DeleteUserById(userId);
+
+                    dataTable.Rows.RemoveAt(rowIndex);
+
+                    dgvUsers.DataSource = null;
+                    dgvUsers.DataSource = dataTable;
+                }
+            }
         }
-    }
 
-    public class User
-    {
-        public int Id { get; set; }
-        public string Name { get; set; }
-        public List<string> Functions { get; set; }
-    }
-
-    public partial class EditFunctionsForm : Form
-    {
-        private User user;
-
-        /*public EditFunctionsForm(User selectedUser)
+        private void DeleteUserById(int userId)
         {
-            InitializeComponent();
+            using (SQLiteConnection con = new SQLiteConnection(cs))
+            {
+                con.Open();
 
-            user = selectedUser;
-
-            // Отображение функций текущего пользователя в TextBox
-            textBoxFunctions.Text = string.Join(", ", user.Functions);
-        }*/
-/*private void btnUpdateFunctions_Click(object sender, EventArgs e)
-        {
-            // Обновление списка функций пользователя на основе данных из TextBox
-            user.Functions = new List<string>(textBoxFunctions.Text.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries));
-
-            // Закрытие формы редактирования
-            Close();
-        }*/
-        
+                string deleteQuery = "DELETE FROM Users WHERE id = @UserId";
+                using (SQLiteCommand cmd = new SQLiteCommand(deleteQuery, con))
+                {
+                    cmd.Parameters.AddWithValue("@UserId", userId);
+                    cmd.ExecuteNonQuery();
+                }
+            }
+        }
     }
 }

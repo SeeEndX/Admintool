@@ -36,7 +36,6 @@ namespace admintool
             this.btnRemove = new System.Windows.Forms.Button();
             this.dgvUsers = new System.Windows.Forms.DataGridView();
             this.isSelected = new System.Windows.Forms.DataGridViewCheckBoxColumn();
-            this.login = new System.Windows.Forms.DataGridViewTextBoxColumn();
             ((System.ComponentModel.ISupportInitialize)(this.dgvUsers)).BeginInit();
             this.SuspendLayout();
             // 
@@ -87,8 +86,7 @@ namespace admintool
             this.dgvUsers.BackgroundColor = System.Drawing.SystemColors.ButtonHighlight;
             this.dgvUsers.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dgvUsers.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
-            this.isSelected,
-            this.login});
+            this.isSelected});
             this.dgvUsers.Location = new System.Drawing.Point(54, 44);
             this.dgvUsers.Name = "dgvUsers";
             this.dgvUsers.ReadOnly = true;
@@ -105,16 +103,6 @@ namespace admintool
             this.isSelected.Name = "isSelected";
             this.isSelected.ReadOnly = true;
             this.isSelected.Width = 82;
-            // 
-            // login
-            // 
-            this.login.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
-            this.login.DataPropertyName = "login";
-            this.login.HeaderText = "Имя пользователя";
-            this.login.MinimumWidth = 8;
-            this.login.Name = "login";
-            this.login.ReadOnly = true;
-            this.login.Width = 173;
             // 
             // AdminForm
             // 
@@ -143,7 +131,6 @@ namespace admintool
         private System.Windows.Forms.Button btnRemove;
         private System.Windows.Forms.DataGridView dgvUsers;
         private DataGridViewCheckBoxColumn isSelected;
-        private DataGridViewTextBoxColumn login;
     }
 }
 
