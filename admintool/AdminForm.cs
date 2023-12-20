@@ -10,7 +10,7 @@ namespace admintool
 {
     public partial class AdminForm : Form
     {
-        private string cs = @"URI=file:G:\\4kurs\\ПИС\\admintool\\AdminToolDB.db";
+        private string cs = @"URI=file:C:\\Users\\ars_1\\Documents\\dbForAdminProg\\AdminToolDB.db";
         SQLiteConnection con;
         private string cmdText = @"
 SELECT Users.id AS 'id', Users.login AS 'Пользователь', GROUP_CONCAT(Function.name, ', ') AS 'Доступные функции'
@@ -75,9 +75,7 @@ GROUP BY Users.login;";
 
         private void btnEdit_Click(object sender, EventArgs e)
         {
-            
-            
-                OpenEditUserForm();
+            OpenEditUserForm();
         }
 
         private void OpenEditUserForm()

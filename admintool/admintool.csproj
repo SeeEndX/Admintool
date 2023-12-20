@@ -84,6 +84,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AddFunctionsForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="AddFunctionsForm.Designer.cs">
+      <DependentUpon>AddFunctionsForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="AddUserForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -117,6 +123,9 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="AddFunctionsForm.resx">
+      <DependentUpon>AddFunctionsForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="AddUserForm.resx">
       <DependentUpon>AddUserForm.cs</DependentUpon>
     </EmbeddedResource>

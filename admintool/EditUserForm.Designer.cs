@@ -132,6 +132,7 @@
             this.btnFunct.TabIndex = 12;
             this.btnFunct.Text = "Функции";
             this.btnFunct.UseVisualStyleBackColor = true;
+            this.btnFunct.Click += new System.EventHandler(this.btnFunct_Click);
             // 
             // EditUserForm
             // 

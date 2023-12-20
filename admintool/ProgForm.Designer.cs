@@ -54,7 +54,6 @@
             this.funcLB.Name = "funcLB";
             this.funcLB.Size = new System.Drawing.Size(365, 178);
             this.funcLB.TabIndex = 6;
-            this.funcLB.SelectedIndexChanged += new System.EventHandler(this.funcLB_SelectedIndexChanged);
             // 
             // btnAct
             // 

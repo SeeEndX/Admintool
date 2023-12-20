@@ -1,12 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.IO;
 
 namespace admintool
 {
@@ -20,26 +15,20 @@ namespace admintool
             showFunctions();
         }
 
-        private void funcLB_SelectedIndexChanged(object sender, EventArgs e)
-        {
-
-        }
-
         private void showFunctions()
         {
             actionList = new List<ActionItem>
             {
                 new ActionItem("Действие 1", () => 
-                    MessageBox.Show("Выполнено Действие 1")),
+                    createTxt1()),
 
                 new ActionItem("Действие 2", () => 
-                    MessageBox.Show("Выполнено Действие 2")),
+                    createTxt2()),
 
                 new ActionItem("Действие 3", () => 
                     MessageBox.Show("Выполнено Действие 3"))
             };
 
-            // Заполнение ListBox названиями действий
             foreach (var action in actionList)
             {
                 funcLB.Items.Add(action.Name);
@@ -58,6 +47,16 @@ namespace admintool
             {
                 MessageBox.Show("Выберите действие из списка.");
             }
+        }
+
+        private void createTxt1()
+        {
+            File.CreateText(@"C:\1.txt");
+        }
+
+        private void createTxt2()
+        {
+            File.CreateText(@"C:\2.txt");
         }
 
         private void btnExit_Click(object sender, EventArgs e)

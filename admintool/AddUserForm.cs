@@ -7,8 +7,7 @@ namespace admintool
 {
     public partial class AddUserForm : Form
     {
-        private string path = "AdminToolDB.db";
-        private string cs = @"URI=file:G:\\4kurs\\ПИС\\admintool\\AdminToolDB.db";
+        private string cs = @"URI=file:C:\\Users\\ars_1\\Documents\\dbForAdminProg\\AdminToolDB.db";
         SQLiteConnection con;
         SQLiteCommand cmd;
 
@@ -60,10 +59,18 @@ namespace admintool
             using (cmd = new SQLiteCommand(cmdText, con))
             {
                 cmd.Parameters.AddWithValue("@Login", login);
-
                 int userCount = Convert.ToInt32(cmd.ExecuteScalar());
-
                 return userCount > 0;
+            }
+        }
+
+        private int GetUserID()
+        {
+            string cmdText = "SELECT last_insert_rowid();";
+            using (cmd = new SQLiteCommand(cmdText, con))
+            {
+                int user_id = Convert.ToInt32(cmd.ExecuteScalar());
+                return user_id;
             }
         }
 
@@ -94,5 +101,20 @@ namespace admintool
         {
             Close();
         }
+
+        private void btnFunct_Click(object sender, EventArgs e)
+        {
+            showFunctionAdd();
+        }
+
+        private void showFunctionAdd()
+        {
+            AddFunctionsForm addFunctionsForm = new AddFunctionsForm("",null);
+            addFunctionsForm.Tag = this;
+            addFunctionsForm.FormClosed += (sender, e) => this.Enabled = true;
+            addFunctionsForm.Show(this);
+            this.Enabled = false;
+        }
+
     }
 }

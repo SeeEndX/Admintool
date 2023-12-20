@@ -8,12 +8,13 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Data.SQLite;
+using System.Collections;
 
 namespace admintool
 {
     public partial class EditUserForm : Form
     {
-        private string cs = @"URI=file:G:\\4kurs\\ПИС\\admintool\\AdminToolDB.db";
+        private string cs = @"URI=file:C:\\Users\\ars_1\\Documents\\dbForAdminProg\\AdminToolDB.db";
         SQLiteConnection con;
         SQLiteCommand cmd;
 
@@ -72,16 +73,14 @@ namespace admintool
 
                         if (rowsAffected > 0)
                         {
-                            MessageBox.Show("Данные успешно обновлены.");
                             DataUpdated?.Invoke(this, EventArgs.Empty);
                         }
                         else
                         {
-                            MessageBox.Show("Ошибка при обновлении данных.");
+                            MessageBox.Show("Ошибка при обновлении данных со стороны БД.");
                         }
                     }
                 }
-                Close();
             }
         }
 
@@ -91,15 +90,132 @@ namespace admintool
             string newPassword = tbPass.Text;
             string newPasswordConf = tbPass2.Text;
 
-            if (tbLogin.Text != "" && tbPass.Text != "" && tbPass2.Text != "")
+            bool isUsernameChanged = newUsername != originalUsername;
+            bool isPasswordChanged = !string.IsNullOrEmpty(newPassword) && newPassword == newPasswordConf;
+
+            if (isUsernameChanged && isPasswordChanged)
             {
-                if (tbPass.Text != tbPass2.Text)
-                    MessageBox.Show("Пароли не совпадают.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                else if (IsUserExists(newUsername))
-                    MessageBox.Show("Пользователь с таким логином уже существует.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                else EditUser(newUsername,newPassword,newPasswordConf);
+                EditUser(newUsername, newPassword, newPasswordConf);
             }
-            else MessageBox.Show("Заполните все поля!", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            else if (isUsernameChanged)
+            {
+                EditUser(newUsername, null, null);
+                MessageBox.Show("Имя пользователя было изменено.", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            else if (isPasswordChanged)
+            {
+                EditUser(originalUsername, newPassword, newPasswordConf);
+                MessageBox.Show("Пароль был изменен.", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            else if (newPassword != newPasswordConf)
+            {
+                MessageBox.Show("Пароли не совпадают.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            else {
+                DataUpdated?.Invoke(this, EventArgs.Empty);
+                MessageBox.Show("Учетные данные не были изменены.", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+        }
+
+        private void btnFunct_Click(object sender, EventArgs e)
+        {
+            showFunctionAdd();
+        }
+
+        private void showFunctionAdd()
+        {
+            int userId = GetSelectedUserId();
+            List<string> assignedFunctionNames = GetFunctionsAssignedToUser(userId);
+            
+            AddFunctionsForm addFunctionsForm = new AddFunctionsForm(originalUsername,assignedFunctionNames);
+            addFunctionsForm.Tag = this;
+            addFunctionsForm.FormClosed += (sender, e) => this.Enabled = true;
+
+            List<string> allFunctions = GetAllFunctions();
+
+            addFunctionsForm.SetAssignedFunctions(allFunctions, assignedFunctionNames);
+
+
+            addFunctionsForm.Show(this);
+            this.Enabled = false;
+        }
+
+        private List<string> GetAllFunctions()
+        {
+            List<string> allFunctions = new List<string>();
+
+            using (con = new SQLiteConnection(cs))
+            {
+                con.Open();
+
+                string query = "SELECT name FROM Function;";
+
+                using (SQLiteCommand cmd = new SQLiteCommand(query, con))
+                {
+                    using (SQLiteDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            string functionName = reader.GetString(0);
+                            allFunctions.Add(functionName);
+                        }
+                    }
+                }
+            }
+
+            return allFunctions;
+        }
+
+        private List<string> GetFunctionsAssignedToUser(int userId)
+        {
+            List<string> assignedFunctionNames = new List<string>();
+
+            using (SQLiteConnection con = new SQLiteConnection(cs))
+            {
+                con.Open();
+
+                string query = @"
+            SELECT f.id, f.name
+            FROM Function f
+            JOIN Function_users fu ON f.id = fu.function
+            WHERE fu.user = @UserId;";
+
+                using (SQLiteCommand cmd = new SQLiteCommand(query, con))
+                {
+                    cmd.Parameters.AddWithValue("@UserId", userId);
+
+                    using (SQLiteDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            string functionName = reader.GetString(1);
+                            assignedFunctionNames.Add(functionName);
+                        }
+                    }
+                }
+            }
+
+            return assignedFunctionNames;
+        }
+
+        private int GetSelectedUserId()
+        {
+            string username = originalUsername;
+            string query = "SELECT id FROM Users WHERE login = @username";
+
+            using (con = new SQLiteConnection(cs))
+            {
+                con.Open();
+
+                using (SQLiteCommand command = new SQLiteCommand(query, con))
+                {
+                    command.Parameters.AddWithValue("@username", username);
+
+                    object result = command.ExecuteScalar();
+                    int userId = Convert.ToInt32(result);
+                    return userId;
+                }
+            }
         }
     }
 }

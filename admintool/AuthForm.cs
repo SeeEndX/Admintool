@@ -8,8 +8,7 @@ namespace admintool
 {
     public partial class AuthForm : Form
     {
-        private string path = "AdminToolDB.db";
-        private string cs = @"URI=file:G:\\4kurs\\ПИС\\admintool\\AdminToolDB.db";
+        private string cs = @"URI=file:C:\\Users\\ars_1\\Documents\\dbForAdminProg\\AdminToolDB.db";
         SQLiteConnection con;
         SQLiteCommand cmd;
 
