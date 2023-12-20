@@ -13,7 +13,7 @@ namespace admintool
         public event EventHandler FunctionsSaved;
         string user;
 
-        public AddFunctionsForm(string username, List<string> assignedFunctionNames)
+        public AddFunctionsForm(string username)
         {
             InitializeComponent();
             user = username;
@@ -23,23 +23,16 @@ namespace admintool
         public void SetAssignedFunctions(List<string> allFunctionNames, List<string> assignedFunctionNames)
         {
             functionList.Items.Clear();
-            functionList.Items.AddRange(allFunctionNames.ToArray());
-            for (int i = 0; i < functionList.Items.Count; i++)
-            {
-                string functionName = functionList.Items[i].ToString();
-                bool isAssigned = assignedFunctionNames.Contains(functionName);
-                functionList.SetItemChecked(i, isAssigned);
-            }
-        }
+            if (allFunctionNames != null)
+                functionList.Items.AddRange(allFunctionNames.ToArray());
 
-        private void LoadData(List<string> assignedFunctionNames)
-        {
-            foreach (string functionName in assignedFunctionNames)
+            if (assignedFunctionNames != null)
             {
-                int index = functionList.FindStringExact(functionName);
-                if (index != -1)
+                for (int i = 0; i < functionList.Items.Count; i++)
                 {
-                    functionList.SetItemChecked(index, true);
+                    string functionName = functionList.Items[i].ToString();
+                    bool isAssigned = assignedFunctionNames.Contains(functionName);
+                    functionList.SetItemChecked(i, isAssigned);
                 }
             }
         }
@@ -80,7 +73,6 @@ namespace admintool
                         }
                     }
                 }
-                con.Close();
             }
             FunctionsSaved?.Invoke(this, EventArgs.Empty);
             MessageBox.Show("Данные сохранены!", "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);

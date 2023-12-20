@@ -115,14 +115,13 @@ namespace admintool
             int userId = GetSelectedUserId();
             List<string> assignedFunctionNames = GetFunctionsAssignedToUser(userId);
             
-            AddFunctionsForm addFunctionsForm = new AddFunctionsForm(originalUsername,assignedFunctionNames);
+            AddFunctionsForm addFunctionsForm = new AddFunctionsForm(originalUsername);
             addFunctionsForm.Tag = this;
             addFunctionsForm.FormClosed += (sender, e) => this.Enabled = true;
 
             List<string> allFunctions = GetAllFunctions();
 
             addFunctionsForm.SetAssignedFunctions(allFunctions, assignedFunctionNames);
-
 
             addFunctionsForm.Show(this);
             this.Enabled = false;
