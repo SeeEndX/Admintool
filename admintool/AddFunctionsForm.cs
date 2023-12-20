@@ -1,13 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
 using System.Data.SQLite;
+using System.Windows.Forms;
 
 namespace admintool
 {
@@ -58,11 +52,9 @@ namespace admintool
         private void btnSave_Click(object sender, EventArgs e)
         {
             int userId = GetSelectedUserId(user);
-
-            using (SQLiteConnection con = new SQLiteConnection(cs))
+            using (con = new SQLiteConnection(cs))
             {
                 con.Open();
-
                 string deleteQuery = "DELETE FROM Function_users WHERE user = @UserId;";
                 using (SQLiteCommand deleteCmd = new SQLiteCommand(deleteQuery, con))
                 {
@@ -88,8 +80,8 @@ namespace admintool
                         }
                     }
                 }
+                con.Close();
             }
-
             FunctionsSaved?.Invoke(this, EventArgs.Empty);
             MessageBox.Show("Данные сохранены!", "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
@@ -108,9 +100,10 @@ namespace admintool
 
                     if (result != null && int.TryParse(result.ToString(), out int userId))
                     {
+                        con.Close();
                         return userId;
                     }
-
+                    con.Close();
                     return 0;
                 }
             }
@@ -130,9 +123,10 @@ namespace admintool
 
                     if (result != null && int.TryParse(result.ToString(), out int functionId))
                     {
+                        con.Close();
                         return functionId;
                     }
-
+                    con.Close();
                     return 0;
                 }
             }

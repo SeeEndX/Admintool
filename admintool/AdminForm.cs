@@ -143,6 +143,7 @@ GROUP BY Users.login;";
                             cmd.Parameters.AddWithValue("@UserId", userId);
                             cmd.ExecuteNonQuery();
                         }
+                        con.Close();
                     }
 
                     dgvUsers.Rows.RemoveAt(i);
@@ -172,6 +173,7 @@ GROUP BY Users.login;";
                             cmd.Parameters.AddWithValue("@UserId", userId);
                             cmd.ExecuteNonQuery();
                         }
+                        con.Close();
                     }
 
                     dgvUsers.Rows.RemoveAt(rowIndex);

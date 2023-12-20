@@ -33,19 +33,6 @@ namespace admintool
             Close();
         }
 
-        private bool IsUserExists(string login)
-        {
-            string cmdText = "SELECT COUNT(*) FROM Users WHERE login = @Login";
-            con = new SQLiteConnection(cs);
-            using (cmd = new SQLiteCommand(cmdText, con))
-            {
-                con.Open();
-                cmd.Parameters.AddWithValue("@Login", login);
-                int userCount = Convert.ToInt32(cmd.ExecuteScalar());
-                return userCount > 0;
-            }
-        }
-
         private void EditUser(string newUsername,string newPassword, string newPasswordConf)
         {
             DialogResult result = MessageBox.Show("Сохранить, " +
@@ -80,6 +67,7 @@ namespace admintool
                             MessageBox.Show("Ошибка при обновлении данных со стороны БД.");
                         }
                     }
+                    con.Close();
                 }
             }
         }
@@ -161,6 +149,7 @@ namespace admintool
                         }
                     }
                 }
+                con.Close();
             }
 
             return allFunctions;
@@ -193,6 +182,7 @@ namespace admintool
                         }
                     }
                 }
+                con.Close();
             }
 
             return assignedFunctionNames;
@@ -215,6 +205,7 @@ namespace admintool
                     int userId = Convert.ToInt32(result);
                     return userId;
                 }
+                con.Close();
             }
         }
     }

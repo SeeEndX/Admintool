@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Windows.Forms;
 using System.Data.SQLite;
-using System.Drawing;
 
 namespace admintool
 {
@@ -14,8 +13,6 @@ namespace admintool
         public event EventHandler DataAdded;
         public AddUserForm()
         {
-            con = new SQLiteConnection(cs);
-            con.Open();
             InitializeComponent();
         }
 
@@ -55,21 +52,26 @@ namespace admintool
         private bool IsUserExists(string login)
         {
             string cmdText = "SELECT COUNT(*) FROM Users WHERE login = @Login";
-
+            con = new SQLiteConnection(cs);
+            con.Open();
             using (cmd = new SQLiteCommand(cmdText, con))
             {
                 cmd.Parameters.AddWithValue("@Login", login);
                 int userCount = Convert.ToInt32(cmd.ExecuteScalar());
+                con.Close();
                 return userCount > 0;
             }
         }
 
         private int GetUserID()
         {
+            con = new SQLiteConnection(cs);
+            con.Open();
             string cmdText = "SELECT last_insert_rowid();";
             using (cmd = new SQLiteCommand(cmdText, con))
             {
                 int user_id = Convert.ToInt32(cmd.ExecuteScalar());
+                con.Close();
                 return user_id;
             }
         }
@@ -77,7 +79,8 @@ namespace admintool
         private bool AddUser(string login, string password)
         {
             string cmdText = "INSERT INTO Users (login, password, usergroup) VALUES (@Login, @Password, @Group)";
-
+            con = new SQLiteConnection(cs);
+            con.Open();
             using (cmd = new SQLiteCommand(cmdText, con))
             {
                 cmd.Parameters.AddWithValue("@Login", login);
@@ -85,7 +88,7 @@ namespace admintool
                 cmd.Parameters.AddWithValue("@Group", "Dev");
 
                 int rowsAffected = cmd.ExecuteNonQuery();
-
+                con.Close();
                 return rowsAffected > 0;
             }
         }
@@ -115,6 +118,5 @@ namespace admintool
             addFunctionsForm.Show(this);
             this.Enabled = false;
         }
-
     }
 }

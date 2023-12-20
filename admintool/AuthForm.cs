@@ -57,6 +57,7 @@ namespace admintool
             {
                 MessageBox.Show("Неверные данные!");
             }
+            con.Close();
         }
 
         private string SqlQuery(string cmdText, SQLiteConnection con, string login, string password)
