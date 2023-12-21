@@ -17,21 +17,14 @@ namespace admintool
         private string currentUser;
 
         private Dictionary<string, Action> functionDictionary = new Dictionary<string, Action>();
-        
+        FunctionExecutor executor;
         public ProgForm(string user)
         {
             InitializeComponent();
             lbHello.Text += ", "+user+"!";
             currentUser = user;
             showFunctions();
-            initDictionary();
-        }
-
-        private void initDictionary()
-        {
-            functionDictionary["Create txt 1"] = СreateTxt1;
-            functionDictionary["Create txt 2"] = CreateTxt2;
-            functionDictionary["Add a pool"] = AddPool;
+            executor = new FunctionExecutor(functionDictionary);
         }
 
         private void showFunctions()
@@ -68,7 +61,7 @@ namespace admintool
                         while (reader.Read())
                         {
                             string functionNameFromDb = reader.GetString(0);
-                            Action action = () => ExecuteMethodByName(functionNameFromDb);
+                            Action action = () => executor.ExecuteMethodByName(functionNameFromDb);
                             functions.Add(new ActionItem(functionNameFromDb, action));
                         }
                     }
@@ -148,7 +141,7 @@ namespace admintool
 
             if (selectedIndex >= 0 && selectedIndex < actionList.Count)
             {
-                ExecuteMethodByName(actionList[selectedIndex].Name);
+                executor.ExecuteMethodByName(actionList[selectedIndex].Name);
                 string currentTime = DateTime.Now.ToString();
 
                 int reportId = AddReport(currentTime);
@@ -215,36 +208,6 @@ namespace admintool
             }
 
             return functionUserId;
-        }
-
-        private void ExecuteMethodByName(string methodName)
-        {
-            if (functionDictionary.TryGetValue(methodName, out Action action))
-            {
-                action?.Invoke();
-            }
-            else
-            {
-                MessageBox.Show($"Метод '{methodName}' не найден.");
-            }
-        }
-
-        private void СreateTxt1()
-        {
-            File.CreateText(@"C:\1.txt");
-            MessageBox.Show("Выполнено Create Txt 1");
-        }
-
-        private void CreateTxt2()
-        {
-            File.CreateText(@"C:\2.txt");
-            MessageBox.Show("Выполнено Create Txt 2");
-        }
-
-        private void AddPool()
-        {
-            MessageBox.Show("Выполнено Add a pool");
-
         }
 
         private void btnExit_Click(object sender, EventArgs e)

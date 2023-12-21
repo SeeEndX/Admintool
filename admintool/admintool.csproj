@@ -115,6 +115,9 @@
     <Compile Include="EditUserForm.Designer.cs">
       <DependentUpon>EditUserForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="FunctionExecutor.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="ProgForm.cs">
       <SubType>Form</SubType>
     </Compile>
