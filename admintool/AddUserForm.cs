@@ -31,11 +31,12 @@ namespace admintool
             if (isFunctClicked)
             {
                 isFunctClicked = false;
+                OnDataAdded();
                 MessageBox.Show("Пользователь был успешно добавлен при назначении функций.", "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             else
             {
-                if (newUsername != "" && newPasswordConf != "")
+                if (newUsername != "" && newPassword != "" && newPasswordConf != "")
                 {
                     if (IsUserExists(newUsername))
                     {
@@ -64,16 +65,14 @@ namespace admintool
                                     updatePasswordCmd.Parameters.AddWithValue("@UserId", userId);
                                     updatePasswordCmd.Parameters.AddWithValue("@Password", newPassword);
                                     updatePasswordCmd.ExecuteNonQuery();
-                                }
-                            }
-                            else
-                            {
-                                if (AddUser(newUsername, newPassword))
-                                {
-                                    MessageBox.Show("Пользователь успешно добавлен.", "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                                    ClearFields();
                                     OnDataAdded();
                                 }
+                            }
+                            else if (AddUser(newUsername, newPassword))
+                            {
+                                MessageBox.Show("Пользователь успешно добавлен.", "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                                ClearFields();
+                                OnDataAdded();
                             }
                         }
                         else
@@ -81,6 +80,10 @@ namespace admintool
                             MessageBox.Show("Заполните все поля!", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         }
                     }
+                }
+                else
+                {
+                    MessageBox.Show("Заполните все поля!", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }

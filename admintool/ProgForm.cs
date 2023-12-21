@@ -4,7 +4,6 @@ using System.Windows.Forms;
 using System.Data.SQLite;
 using System.Reflection;
 using System.IO;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
 
 namespace admintool
 {
@@ -245,6 +244,7 @@ namespace admintool
         private void AddPool()
         {
             MessageBox.Show("Выполнено Add a pool");
+
         }
 
         private void btnExit_Click(object sender, EventArgs e)

@@ -30,44 +30,76 @@ namespace admintool
 
         private void btnBack_Click(object sender, EventArgs e)
         {
+            DataUpdated?.Invoke(this, EventArgs.Empty);
             Close();
         }
 
-        private void EditUser(string newUsername,string newPassword, string newPasswordConf)
+        private void EditUser(string newUsername,string newPassword)
         {
+            string updateQuery;
             DialogResult result = MessageBox.Show("Сохранить, " +
                 "новые данные пользователя?",
                 "Подтверждение изменения", MessageBoxButtons.YesNo,
                 MessageBoxIcon.Question);
             if (result == DialogResult.Yes)
             {
+                if (tbPass.Text == "" && tbPass2.Text == "")
+                {
+                    if (IsUserExists(newUsername))
+                    {
+                        MessageBox.Show("Пользователь с таким логином уже существует", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return;
+                    }
+                    updateQuery = @"
+UPDATE Users
+SET login = @NewUsername WHERE login = @OriginalUsername;";
+                }
+                else if (tbPass2.Text != tbPass.Text)
+                {
+                    MessageBox.Show("Пароли не совпадают", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+                else if (newUsername == originalUsername)
+                {
+                    updateQuery = @"
+UPDATE Users
+SET password = @NewPassword
+WHERE login = @OriginalUsername;";
+                }
+                else
+                {
+                    if (IsUserExists(newUsername))
+                    {
+                        MessageBox.Show("Пользователь с таким логином уже существует", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return;
+                    }
+                    updateQuery = @"
+UPDATE Users
+SET login = @NewUsername, password = @NewPassword
+WHERE login = @OriginalUsername;";
+                }
                 using (con = new SQLiteConnection(cs))
                 {
                     con.Open();
 
-                    string updateQuery = @"
-            UPDATE Users
-            SET login = @NewUsername, password = @NewPassword
-            WHERE login = @OriginalUsername;";
-
-                    using (SQLiteCommand cmd = new SQLiteCommand(updateQuery, con))
+                    using (cmd = new SQLiteCommand(updateQuery, con))
                     {
                         cmd.Parameters.AddWithValue("@NewUsername", newUsername);
-                        cmd.Parameters.AddWithValue("@NewPassword", newPassword);
                         cmd.Parameters.AddWithValue("@OriginalUsername", originalUsername);
-
+                        cmd.Parameters.AddWithValue("@NewPassword", newPassword);
                         int rowsAffected = cmd.ExecuteNonQuery();
 
                         if (rowsAffected > 0)
                         {
                             DataUpdated?.Invoke(this, EventArgs.Empty);
+                            MessageBox.Show("Имя пользователя и пароль успешно изменены.", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                            Close();
                         }
                         else
                         {
                             MessageBox.Show("Ошибка при обновлении данных со стороны БД.");
                         }
                     }
-                    con.Close();
                 }
             }
         }
@@ -83,25 +115,47 @@ namespace admintool
 
             if (isUsernameChanged && isPasswordChanged)
             {
-                EditUser(newUsername, newPassword, newPasswordConf);
+                DataUpdated?.Invoke(this, EventArgs.Empty);
+                EditUser(newUsername, newPassword);
+
             }
             else if (isUsernameChanged)
             {
-                EditUser(newUsername, null, null);
-                MessageBox.Show("Имя пользователя было изменено.", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                EditUser(newUsername, null);
+                DataUpdated?.Invoke(this, EventArgs.Empty);
             }
             else if (isPasswordChanged)
             {
-                EditUser(originalUsername, newPassword, newPasswordConf);
-                MessageBox.Show("Пароль был изменен.", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                EditUser(originalUsername, newPassword);
+                DataUpdated?.Invoke(this, EventArgs.Empty);
             }
             else if (newPassword != newPasswordConf)
             {
                 MessageBox.Show("Пароли не совпадают.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-            else {
+            else
+            {
                 DataUpdated?.Invoke(this, EventArgs.Empty);
                 MessageBox.Show("Учетные данные не были изменены.", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                Close();
+            }
+        }
+
+        private bool IsUserExists(string username)
+        {
+            using (SQLiteConnection con = new SQLiteConnection(cs))
+            {
+                con.Open();
+
+                string query = "SELECT COUNT(*) FROM Users WHERE login = @Username;";
+
+                using (SQLiteCommand cmd = new SQLiteCommand(query, con))
+                {
+                    cmd.Parameters.AddWithValue("@Username", username);
+
+                    int count = Convert.ToInt32(cmd.ExecuteScalar());
+                    return count > 0;
+                }
             }
         }
 
@@ -204,8 +258,12 @@ namespace admintool
                     int userId = Convert.ToInt32(result);
                     return userId;
                 }
-                con.Close();
             }
+        }
+
+        private void EditUserForm_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            DataUpdated?.Invoke(this, EventArgs.Empty);
         }
     }
 }

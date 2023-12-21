@@ -72,6 +72,7 @@
             this.Controls.Add(this.btnLogout);
             this.Controls.Add(this.label1);
             this.Name = "ViewReportForm";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Просмотр отчета";
             this.ResumeLayout(false);
             this.PerformLayout();

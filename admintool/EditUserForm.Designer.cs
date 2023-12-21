@@ -151,6 +151,7 @@
             this.Name = "EditUserForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Редактирование пользователя";
+            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.EditUserForm_FormClosed);
             this.ResumeLayout(false);
             this.PerformLayout();
 
