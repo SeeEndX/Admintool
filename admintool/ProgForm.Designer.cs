@@ -99,6 +99,7 @@
             this.Name = "ProgForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "ProgForm";
+            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.ProgForm_FormClosed);
             this.ResumeLayout(false);
             this.PerformLayout();
 

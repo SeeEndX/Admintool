@@ -1,38 +1,81 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
+using System.Data.SQLite;
+using System.Reflection;
 using System.IO;
 
 namespace admintool
 {
     public partial class ProgForm : Form
     {
+        private string cs = @"URI=file:C:\\Users\\ars_1\\Documents\\dbForAdminProg\\AdminToolDB.db";
+        SQLiteConnection con;
+        SQLiteCommand cmd;
+
         private List<ActionItem> actionList;
+        private string currentUser;
+
+        private Dictionary<string, Action> functionDictionary = new Dictionary<string, Action>();
+        
         public ProgForm(string user)
         {
             InitializeComponent();
             lbHello.Text += ", "+user+"!";
+            currentUser = user;
             showFunctions();
+            initDictionary();
+        }
+
+        private void initDictionary()
+        {
+            functionDictionary["Create txt 1"] = СreateTxt1;
+            functionDictionary["Create txt 2"] = CreateTxt2;
+            functionDictionary["Add a pool"] = AddPool;
         }
 
         private void showFunctions()
         {
-            actionList = new List<ActionItem>
-            {
-                new ActionItem("Действие 1", () => 
-                    createTxt1()),
-
-                new ActionItem("Действие 2", () => 
-                    createTxt2()),
-
-                new ActionItem("Действие 3", () => 
-                    MessageBox.Show("Выполнено Действие 3"))
-            };
+            actionList = GetFunctionsForUser(currentUser);
 
             foreach (var action in actionList)
             {
                 funcLB.Items.Add(action.Name);
             }
+        }
+
+        private List<ActionItem> GetFunctionsForUser(string user)
+        {
+            List<ActionItem> functions = new List<ActionItem>();
+
+            using (con = new SQLiteConnection(cs))
+            {
+                con.Open();
+
+                string query = @"
+            SELECT f.name
+            FROM Function f
+            JOIN Function_users fu ON f.id = fu.function
+            JOIN Users u ON u.id = fu.user
+            WHERE u.login = @User;";
+
+                using (cmd = new SQLiteCommand(query, con))
+                {
+                    cmd.Parameters.AddWithValue("@User", user);
+
+                    using (SQLiteDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            string functionNameFromDb = reader.GetString(0);
+                            Action action = () => ExecuteMethodByName(functionNameFromDb);
+                            functions.Add(new ActionItem(functionNameFromDb, action));
+                        }
+                    }
+                }
+            }
+
+            return functions;
         }
 
         private void btnAct_Click(object sender, EventArgs e)
@@ -41,7 +84,7 @@ namespace admintool
 
             if (selectedIndex >= 0 && selectedIndex < actionList.Count)
             {
-                actionList[selectedIndex].Action.Invoke();
+                ExecuteMethodByName(actionList[selectedIndex].Name);
             }
             else
             {
@@ -49,14 +92,33 @@ namespace admintool
             }
         }
 
-        private void createTxt1()
+        private void ExecuteMethodByName(string methodName)
         {
-            File.CreateText(@"C:\1.txt");
+            if (functionDictionary.TryGetValue(methodName, out Action action))
+            {
+                action?.Invoke();
+            }
+            else
+            {
+                MessageBox.Show($"Метод '{methodName}' не найден.");
+            }
         }
 
-        private void createTxt2()
+        private void СreateTxt1()
+        {
+            File.CreateText(@"C:\1.txt");
+            MessageBox.Show("Выполнено Create Txt 1");
+        }
+
+        private void CreateTxt2()
         {
             File.CreateText(@"C:\2.txt");
+            MessageBox.Show("Выполнено Create Txt 2");
+        }
+
+        private void AddPool()
+        {
+            MessageBox.Show("Выполнено Add a pool");
         }
 
         private void btnExit_Click(object sender, EventArgs e)
@@ -65,6 +127,11 @@ namespace admintool
             auth.Tag = this;
             auth.Show(this);
             Hide();
+        }
+
+        private void ProgForm_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            Application.Exit();
         }
     }
 

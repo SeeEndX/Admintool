@@ -192,8 +192,12 @@ GROUP BY Users.login;";
                     checkboxCell.Value = checkboxCell.Value == null || !(bool)checkboxCell.Value;
                     dgvUsers.EndEdit();
                 }
-
             }
+        }
+
+        private void AdminForm_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            Application.Exit();
         }
     }
 }
