@@ -15,8 +15,6 @@ namespace admintool
         private string path;
         private string currentName;
         private string newName;
-        private int port;
-        public event EventHandler DataAdded;
 
         public EditIISWebSite(string currentName)
         {
@@ -25,20 +23,34 @@ namespace admintool
             tbName.Text = currentName;
         }
 
-        protected virtual void OnDataAdded()
-        {
-            DataAdded?.Invoke(this, EventArgs.Empty);
-        }
-
         private void btnEdit_Click(object sender, EventArgs e)
         {
-            path = tbPath.Text;
-            newName = tbName.Text;
-            port = ((int)numPort.Value);
+            if (tbPath.Text == "" || tbName.Text == "")
+            {
+                MessageBox.Show("Введите все данные", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            else
+            {
+                path = tbPath.Text;
+                newName = tbName.Text;
+                IISManager.ModifyWebsite(currentName, newName, path);
+                Close();
+            }
+        }
 
-            IISManager.ModifyWebsite(currentName, newName, path, port);
-            OnDataAdded();
-            Close();
+        private void ChooseDirectory()
+        {
+            FolderBrowserDialog FBD = new FolderBrowserDialog();
+            FBD.ShowNewFolderButton = false;
+            if (FBD.ShowDialog() == DialogResult.OK)
+            {
+                tbPath.Text = FBD.SelectedPath;
+            }
+        }
+
+        private void btnDirect_Click(object sender, EventArgs e)
+        {
+            ChooseDirectory();
         }
     }
 }

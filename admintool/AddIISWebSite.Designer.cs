@@ -127,13 +127,14 @@
             // 
             // btnDirect
             // 
-            this.btnDirect.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.btnDirect.Location = new System.Drawing.Point(277, 166);
+            this.btnDirect.BackColor = System.Drawing.SystemColors.ButtonFace;
+            this.btnDirect.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.btnDirect.Location = new System.Drawing.Point(269, 165);
             this.btnDirect.Name = "btnDirect";
-            this.btnDirect.Size = new System.Drawing.Size(33, 35);
-            this.btnDirect.TabIndex = 10;
+            this.btnDirect.Size = new System.Drawing.Size(41, 38);
+            this.btnDirect.TabIndex = 18;
             this.btnDirect.Text = "...";
-            this.btnDirect.UseVisualStyleBackColor = true;
+            this.btnDirect.UseVisualStyleBackColor = false;
             this.btnDirect.Click += new System.EventHandler(this.btnDirect_Click);
             // 
             // AddIISWebSite

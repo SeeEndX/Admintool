@@ -16,8 +16,6 @@ namespace admintool
         private string name;
         private int port;
 
-        public event EventHandler DataAdded;
-
         public AddIISWebSite()
         {
             InitializeComponent();
@@ -25,18 +23,19 @@ namespace admintool
 
         private void btnAdd_Click(object sender, EventArgs e)
         {
-            path = tbPath.Text;
-            name = tbName.Text;
-            port = ((int)numPort.Value);
+            if (tbName.Text == "" || tbPath.Text == "")
+            {
+                MessageBox.Show("Введите все данные", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            else
+            {
+                path = tbPath.Text;
+                name = tbName.Text;
+                port = ((int)numPort.Value);
 
-            IISManager.CreateWebsite(name, path, port);
-            OnDataAdded();
-            Close();
-        }
-
-        protected virtual void OnDataAdded()
-        {
-            DataAdded?.Invoke(this, EventArgs.Empty);
+                IISManager.CreateWebsite(name, path, port);
+                Close();
+            }
         }
 
         private void ChooseDirectory()

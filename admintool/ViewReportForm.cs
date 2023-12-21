@@ -22,48 +22,40 @@ namespace admintool
 
         private void GetReportsForUser(int user)
         {
-            using (con = new SQLiteConnection(cs))
+            try
             {
-                con.Open();
-
-                string query = @"
-SELECT
-    users.login AS UserName,
-    function.name AS FunctionName,
-    function.description AS FunctionDescription,
-    reports.time AS ExecutionTime
-FROM reports_functions
-JOIN reports ON reports_functions.report = reports.id
-JOIN function_users ON reports_functions.function_user = function_users.id
-JOIN users ON function_users.user = users.id
-JOIN function ON function_users.function = function.id
-WHERE users.id = @User;";
-
-                using (cmd = new SQLiteCommand(query, con))
+                using (con = new SQLiteConnection(cs))
                 {
-                    cmd.Parameters.AddWithValue("@User", user);
+                    con.Open();
 
-                    using (SQLiteDataReader reader = cmd.ExecuteReader())
+                    string query = @"
+                SELECT U.login, R.description, R.time
+                FROM Reports R
+                JOIN Users U ON R.user = U.id
+                WHERE R.user = @UserId;";
+
+                    using (cmd = new SQLiteCommand(query, con))
                     {
-                        if (reader.HasRows)
+                        cmd.Parameters.AddWithValue("@UserId", user);
+
+                        using (SQLiteDataReader reader = cmd.ExecuteReader())
                         {
                             while (reader.Read())
                             {
-                                string userName = reader["UserName"].ToString();
-                                string functionName = reader["FunctionName"].ToString();
-                                string functionDescription = reader["FunctionDescription"].ToString();
-                                string executionTime = reader["ExecutionTime"].ToString();
-                                username = userName;
-                                string reportEntry = $"Выполнена функция {functionName}\n ({functionDescription})\nв ({executionTime})\n\n";
+                                string login = reader.GetString(0);
+                                string description = reader.GetString(1);
+                                string time = reader.GetString(2);
+                                username = login;
+                                string reportEntry = $"{description}\n в {time}\n\n";
                                 rtbReports.Text += reportEntry;
                             }
                         }
-                        else
-                        {
-                            rtbReports.Text = "Пользователь еще не запускал функции.";
-                        }
                     }
                 }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка при получении отчетов для пользователя: {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             label1.Text += username;
         }

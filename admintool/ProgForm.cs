@@ -28,20 +28,31 @@ namespace admintool
 
         private void InitData()
         {
-            showFunctions();
             InitializeTabs();
             executor = new FunctionExecutor(functionDictionary);
+            dgvSitesInit();
+            dgvPoolInit();
+            if (tabManageSite != null)
+            {
+                UpdateSitesDataGridView();
+            }
+            if (tabManagePool != null)
+            {
+                UpdatePoolDataGridView();
+            }
+        }
+
+        private void dgvSitesInit()
+        {
             dgvSites.Columns.Add("SiteName", "Название сайта");
             dgvSites.Columns["SiteName"].AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
             dgvSites.Columns["SiteName"].Frozen = true;
             dgvSites.Columns.Add("SiteState", "Состояние сайта");
             dgvSites.Columns["SiteState"].AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
             dgvSites.Columns["SiteState"].Frozen = true;
-
-            if (tabManageSite != null)
-            {
-                PopulateDataGridView();
-            }
+            dgvSites.Columns.Add("SiteBinding", "Привязки сайта");
+            dgvSites.Columns["SiteBinding"].AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
+            dgvSites.Columns["SiteBinding"].Frozen = true;
         }
 
         private void InitializeTabs()
@@ -65,7 +76,7 @@ namespace admintool
             }
         }
 
-        private void PopulateDataGridView()
+        private void UpdateSitesDataGridView()
         {
             List<IISManager.SiteInfo> listOfSites = IISManager.GetListOfSites();
 
@@ -73,7 +84,7 @@ namespace admintool
 
             foreach (IISManager.SiteInfo site in listOfSites)
             {
-                dgvSites.Rows.Add(site.Name, site.State);
+                dgvSites.Rows.Add(site.Name, site.State, site.Bindings);
             }
         }
 
@@ -101,15 +112,6 @@ namespace admintool
             }
         }
 
-        private void showFunctions()
-        {
-            actionList = GetFunctionsForUser(currentUser);
-
-            foreach (var action in actionList)
-            {
-                funcLB.Items.Add(action.Name);
-            }
-        }
 
         private List<ActionItem> GetFunctionsForUser(string user)
         {
@@ -145,87 +147,21 @@ namespace admintool
             return functions;
         }
 
-        private int AddReport(string time)
+        private void AddReport(string description)
         {
             using (SQLiteConnection con = new SQLiteConnection(cs))
             {
                 con.Open();
 
-                string insertReportQuery = "INSERT INTO Reports (time) VALUES (@Time);";
+                string insertReportQuery = "INSERT INTO Reports (user, description, time) VALUES (@UserId, @Description, @Time);";
                 using (SQLiteCommand insertReportCmd = new SQLiteCommand(insertReportQuery, con))
                 {
-                    insertReportCmd.Parameters.AddWithValue("@Time", time);
+                    insertReportCmd.Parameters.AddWithValue("@UserId", GetUserIdByUsername(currentUser));
+                    insertReportCmd.Parameters.AddWithValue("@Description", description);
+                    insertReportCmd.Parameters.AddWithValue("@Time", DateTime.Now.ToString());
+
                     insertReportCmd.ExecuteNonQuery();
                 }
-
-                string selectLastIdQuery = "SELECT last_insert_rowid();";
-                using (SQLiteCommand selectLastIdCmd = new SQLiteCommand(selectLastIdQuery, con))
-                {
-                    object result = selectLastIdCmd.ExecuteScalar();
-                    int lastInsertedId = Convert.ToInt32(result);
-                    return lastInsertedId;
-                }
-            }
-        }
-
-        public void LinkReportWithFunction(int reportId, int userId, string functionName)
-        {
-            using (SQLiteConnection con = new SQLiteConnection(cs))
-            {
-                con.Open();
-
-                string subquery = @"
-            SELECT Function_users.id
-            FROM Function_users
-            JOIN Users ON Users.id = Function_users.user
-            JOIN Function ON Function.id = Function_users.function
-            WHERE Users.id = @UserId AND Function.name = @FunctionName;";
-
-                using (SQLiteCommand subqueryCmd = new SQLiteCommand(subquery, con))
-                {
-                    subqueryCmd.Parameters.AddWithValue("@UserId", userId);
-                    subqueryCmd.Parameters.AddWithValue("@FunctionName", functionName);
-
-                    object result = subqueryCmd.ExecuteScalar();
-
-                    if (result != null && result != DBNull.Value)
-                    {
-                        int functionUserId = Convert.ToInt32(result);
-
-                        string query = "INSERT INTO Reports_functions (report, function_user) VALUES (@ReportId, @FunctionUserId);";
-
-                        using (SQLiteCommand cmd = new SQLiteCommand(query, con))
-                        {
-                            cmd.Parameters.AddWithValue("@ReportId", reportId);
-                            cmd.Parameters.AddWithValue("@FunctionUserId", functionUserId);
-                            cmd.ExecuteNonQuery();
-                        }
-                    }
-                    else
-                    {
-                        MessageBox.Show("Нет подключения к БД", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
-                }
-            }
-        }
-
-        private void btnAct_Click(object sender, EventArgs e)
-        {
-            int selectedIndex = funcLB.SelectedIndex;
-
-            if (selectedIndex >= 0 && selectedIndex < actionList.Count)
-            {
-                executor.ExecuteMethodByName(actionList[selectedIndex].Name);
-                string currentTime = DateTime.Now.ToString();
-
-                int reportId = AddReport(currentTime);
-                int userId = GetUserIdByUsername(currentUser);
-                int functionUserId = GetFunctionUserId(userId, actionList[selectedIndex].Name);
-                LinkReportWithFunction(reportId, functionUserId, actionList[selectedIndex].Name);
-            }
-            else
-            {
-                MessageBox.Show("Выберите действие из списка.");
             }
         }
 
@@ -254,36 +190,6 @@ namespace admintool
             return userId;
         }
 
-        private int GetFunctionUserId(int userId, string functionName)
-        {
-            int functionUserId = 0;
-
-            using (con = new SQLiteConnection(cs))
-            {
-                con.Open();
-
-                string query = @"
-            SELECT user
-            FROM Function_users
-            WHERE user = @UserId AND function = (SELECT id FROM Function WHERE name = @FunctionName);";
-
-                using (SQLiteCommand cmd = new SQLiteCommand(query, con))
-                {
-                    cmd.Parameters.AddWithValue("@UserId", userId);
-                    cmd.Parameters.AddWithValue("@FunctionName", functionName);
-
-                    object result = cmd.ExecuteScalar();
-
-                    if (result != null)
-                    {
-                        functionUserId = Convert.ToInt32(result);
-                    }
-                }
-            }
-
-            return functionUserId;
-        }
-
         private void btnExit_Click(object sender, EventArgs e)
         {
             AuthForm auth = new AuthForm();
@@ -300,14 +206,17 @@ namespace admintool
         private void btnAddSite_Click(object sender, EventArgs e)
         {
             ShowAddingIISWebSite();
-            PopulateDataGridView();
         }
 
         private void ShowAddingIISWebSite()
         {
             AddIISWebSite addIISWebSite = new AddIISWebSite();
             addIISWebSite.Tag = this;
-            addIISWebSite.FormClosed += (sender, e) => this.Enabled = true;
+            addIISWebSite.FormClosed += (sender, e) => {
+                this.Enabled = true;
+                UpdateSitesDataGridView();
+                AddReport("Добавлен сайт на веб-сервер Microsoft IIS Server"); //eventHandler на будущее
+            };
             addIISWebSite.Show(this);
             this.Enabled = false;
         }
@@ -319,7 +228,6 @@ namespace admintool
                 int rowIndex = dgvSites.SelectedCells[0].RowIndex;
                 string currentName = dgvSites.Rows[rowIndex].Cells["SiteName"].Value.ToString();
                 ShowEditingIISWebSite(currentName);
-                PopulateDataGridView();
             }
             else
             {
@@ -331,7 +239,12 @@ namespace admintool
         {
             EditIISWebSite editIISWebSite = new EditIISWebSite(currentName);
             editIISWebSite.Tag = this;
-            editIISWebSite.FormClosed += (sender, e) => this.Enabled = true;
+            editIISWebSite.FormClosed += (sender, e) =>
+            {
+                this.Enabled = true;
+                UpdateSitesDataGridView();
+                AddReport($"Изменен сайт {currentName} на веб-сервере Microsoft IIS"); //eventHandler на будущее
+            };
             editIISWebSite.Show(this);
             this.Enabled = false;
         }
@@ -350,7 +263,8 @@ namespace admintool
                 if (result == DialogResult.Yes)
                 {
                     IISManager.DeleteWebsite(selectedSiteName);
-                    PopulateDataGridView();
+                    UpdateSitesDataGridView();
+                    AddReport($"С веб-сервера Microsoft IIS был удален сайт {selectedSiteName}");
                 }
             }
             else
@@ -370,11 +284,13 @@ namespace admintool
                 if (selectedSiteState == "Stopped")
                 {
                     IISManager.StartSite(selectedSiteName);
-                    PopulateDataGridView();
+                    UpdateSitesDataGridView();
+                    AddReport($"На веб-сервере Microsoft IIS был запущен сайт {selectedSiteName}");
                 }
                 else
                 {
                     MessageBox.Show("Сайт уже запущен или в процессе запуска.", "Предупреждение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    AddReport($"На веб-сервере Microsoft IIS была осуществленна попытка запустить сайт {selectedSiteName}, который уже запущен");
                 }
             }
             else
@@ -394,16 +310,169 @@ namespace admintool
                 if (selectedSiteState == "Started")
                 {
                     IISManager.StopSite(selectedSiteName);
-                    PopulateDataGridView();
+                    UpdateSitesDataGridView();
+                    AddReport($"На веб-сервере Microsoft IIS был остановлен сайт {selectedSiteName}");
                 }
                 else
                 {
                     MessageBox.Show("Сайт уже остановлен или в процессе остановки.", "Предупреждение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    AddReport($"На веб-сервере Microsoft IIS была осуществленна попытка остановить сайт {selectedSiteName}, который уже остановлен");
                 }
             }
             else
             {
-                MessageBox.Show("Выберите ячейку с сайтом для остановки.", "Предупреждение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Выберите сайт для остановки.", "Предупреждение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+        }
+
+        private void btnAddPool_Click(object sender, EventArgs e)
+        {
+            ShowAddingPool();
+        }
+
+        private void dgvPoolInit()
+        {
+            dgvPool.Columns.Add("PoolName", "Название пула");
+            dgvPool.Columns["PoolName"].AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
+            dgvPool.Columns["PoolName"].Frozen = true;
+            dgvPool.Columns.Add("PoolState", "Состояние пула");
+            dgvPool.Columns["PoolState"].AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
+            dgvPool.Columns["PoolState"].Frozen = true;
+            dgvPool.Columns.Add("NetVersion", "Версия CLR");
+            dgvPool.Columns["NetVersion"].AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
+            dgvPool.Columns["NetVersion"].Frozen = true;
+            dgvPool.Columns.Add("ManagedPipelineMode", "Режим конвейера");
+            dgvPool.Columns["ManagedPipelineMode"].AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
+            dgvPool.Columns["ManagedPipelineMode"].Frozen = true;
+        }
+
+        private void UpdatePoolDataGridView()
+        {
+            List<IISManager.AppPoolInfo> listOfAppPools = IISManager.GetListOfAppPools();
+
+            dgvPool.Rows.Clear();
+
+            foreach (IISManager.AppPoolInfo appPool in listOfAppPools)
+            {
+                dgvPool.Rows.Add(appPool.Name, appPool.State, appPool.NETCLRVersion, appPool.ManagedPipelineMode);
+            }
+        }
+
+        private void ShowAddingPool()
+        {
+            AddIISPool addIISPool = new AddIISPool();
+            addIISPool.Tag = this;
+            addIISPool.FormClosed += (sender, e) =>
+            {
+                this.Enabled = true;
+                UpdatePoolDataGridView();
+                AddReport($"На веб-сервере Microsoft IIS был добавлен пул"); //eventHandler на будущее
+            };
+            addIISPool.Show(this);
+            this.Enabled = false;
+        }
+
+        private void btnDeletePool_Click(object sender, EventArgs e)
+        {
+            if (dgvPool.SelectedCells.Count > 0)
+            {
+                int rowIndex = dgvPool.SelectedCells[0].RowIndex;
+                string selectedPoolName = dgvPool.Rows[rowIndex].Cells["PoolName"].Value.ToString();
+
+                DialogResult result = MessageBox.Show($"Вы уверены, что хотите удалить пул приложений '{selectedPoolName}'?",
+                                                      "Подтверждение удаления",
+                                                      MessageBoxButtons.YesNo,
+                                                      MessageBoxIcon.Question);
+                if (result == DialogResult.Yes)
+                {
+                    IISManager.DeletePool(selectedPoolName);
+                    UpdatePoolDataGridView();
+                    AddReport($"С веб-сервера Microsoft IIS был удален пул приложений {selectedPoolName}");
+                }
+            }
+            else
+            {
+                MessageBox.Show("Выберите пул для удаления.", "Предупреждение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+        }
+
+        private void ShowEditingPool(string currentName)
+        {
+            EditIISPool editIISPool = new EditIISPool(currentName);
+            editIISPool.Tag = this;
+            editIISPool.FormClosed += (sender, e) =>
+            {
+                this.Enabled = true;
+                UpdatePoolDataGridView();
+                AddReport($"Изменен пул приложений {currentName} на веб-сервере Microsoft IIS"); //eventHandler на будущее
+            };
+            editIISPool.Show(this);
+            this.Enabled = false;
+        }
+
+        private void btnEditPool_Click(object sender, EventArgs e)
+        {
+            if (dgvPool.SelectedCells.Count > 0)
+            {
+                int rowIndex = dgvPool.SelectedCells[0].RowIndex;
+                string currentName = dgvPool.Rows[rowIndex].Cells["PoolName"].Value.ToString();
+                ShowEditingPool(currentName);
+            }
+            else
+            {
+                MessageBox.Show("Выберите пул для редактирования.", "Предупреждение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+        }
+
+        private void btnStartPool_Click(object sender, EventArgs e)
+        {
+            if (dgvPool.SelectedCells.Count > 0)
+            {
+                int rowIndex = dgvPool.SelectedCells[0].RowIndex;
+                string selectedPoolName = dgvPool.Rows[rowIndex].Cells["PoolName"].Value.ToString();
+                string selectedPoolState = dgvPool.Rows[rowIndex].Cells["PoolState"].Value.ToString();
+
+                if (selectedPoolState == "Stopped")
+                {
+                    IISManager.StartAppPool(selectedPoolName);
+                    UpdatePoolDataGridView();
+                    AddReport($"На веб-сервере Microsoft IIS был запущен пул приложений {selectedPoolName}");
+                }
+                else
+                {
+                    MessageBox.Show("Пул уже запущен или в процессе запуска.", "Предупреждение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    AddReport($"На веб-сервере Microsoft IIS была осуществленна попытка запустить пул приложений {selectedPoolName}, который уже запущен");
+                }
+            }
+            else
+            {
+                MessageBox.Show("Выберите пул для запуска.", "Предупреждение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+        }
+
+        private void btnStopPool_Click(object sender, EventArgs e)
+        {
+            if (dgvPool.SelectedCells.Count > 0)
+            {
+                int rowIndex = dgvPool.SelectedCells[0].RowIndex;
+                string selectedPoolName = dgvPool.Rows[rowIndex].Cells["PoolName"].Value.ToString();
+                string selectedPoolState = dgvPool.Rows[rowIndex].Cells["PoolState"].Value.ToString();
+
+                if (selectedPoolState == "Started")
+                {
+                    IISManager.StopAppPool(selectedPoolName);
+                    UpdatePoolDataGridView();
+                    AddReport($"На веб-сервере Microsoft IIS был остановлен пул {selectedPoolName}");
+                }
+                else
+                {
+                    MessageBox.Show("Пул уже остановлен или в процессе остановки.", "Предупреждение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    AddReport($"На веб-сервере Microsoft IIS была осуществленна попытка остановить пул {selectedPoolName}, который уже остановлен");
+                }
+            }
+            else
+            {
+                MessageBox.Show("Выберите пул для остановки.", "Предупреждение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
     }
