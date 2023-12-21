@@ -4,6 +4,7 @@ using System.Windows.Forms;
 using System.Data.SQLite;
 using System.Reflection;
 using System.IO;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
 
 namespace admintool
 {
@@ -78,6 +79,70 @@ namespace admintool
             return functions;
         }
 
+        private int AddReport(string time)
+        {
+            using (SQLiteConnection con = new SQLiteConnection(cs))
+            {
+                con.Open();
+
+                string insertReportQuery = "INSERT INTO Reports (time) VALUES (@Time);";
+                using (SQLiteCommand insertReportCmd = new SQLiteCommand(insertReportQuery, con))
+                {
+                    insertReportCmd.Parameters.AddWithValue("@Time", time);
+                    insertReportCmd.ExecuteNonQuery();
+                }
+
+                string selectLastIdQuery = "SELECT last_insert_rowid();";
+                using (SQLiteCommand selectLastIdCmd = new SQLiteCommand(selectLastIdQuery, con))
+                {
+                    object result = selectLastIdCmd.ExecuteScalar();
+                    int lastInsertedId = Convert.ToInt32(result);
+                    return lastInsertedId;
+                }
+            }
+        }
+
+        public void LinkReportWithFunction(int reportId, int userId, string functionName)
+        {
+            using (SQLiteConnection con = new SQLiteConnection(cs))
+            {
+                con.Open();
+
+                string subquery = @"
+            SELECT Function_users.id
+            FROM Function_users
+            JOIN Users ON Users.id = Function_users.user
+            JOIN Function ON Function.id = Function_users.function
+            WHERE Users.id = @UserId AND Function.name = @FunctionName;";
+
+                using (SQLiteCommand subqueryCmd = new SQLiteCommand(subquery, con))
+                {
+                    subqueryCmd.Parameters.AddWithValue("@UserId", userId);
+                    subqueryCmd.Parameters.AddWithValue("@FunctionName", functionName);
+
+                    object result = subqueryCmd.ExecuteScalar();
+
+                    if (result != null && result != DBNull.Value)
+                    {
+                        int functionUserId = Convert.ToInt32(result);
+
+                        string query = "INSERT INTO Reports_functions (report, function_user) VALUES (@ReportId, @FunctionUserId);";
+
+                        using (SQLiteCommand cmd = new SQLiteCommand(query, con))
+                        {
+                            cmd.Parameters.AddWithValue("@ReportId", reportId);
+                            cmd.Parameters.AddWithValue("@FunctionUserId", functionUserId);
+                            cmd.ExecuteNonQuery();
+                        }
+                    }
+                    else
+                    {
+                        MessageBox.Show("Нет подключения к БД", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+            }
+        }
+
         private void btnAct_Click(object sender, EventArgs e)
         {
             int selectedIndex = funcLB.SelectedIndex;
@@ -85,11 +150,72 @@ namespace admintool
             if (selectedIndex >= 0 && selectedIndex < actionList.Count)
             {
                 ExecuteMethodByName(actionList[selectedIndex].Name);
+                string currentTime = DateTime.Now.ToString();
+
+                int reportId = AddReport(currentTime);
+                int userId = GetUserIdByUsername(currentUser);
+                int functionUserId = GetFunctionUserId(userId, actionList[selectedIndex].Name);
+                LinkReportWithFunction(reportId, functionUserId, actionList[selectedIndex].Name);
             }
             else
             {
                 MessageBox.Show("Выберите действие из списка.");
             }
+        }
+
+        private int GetUserIdByUsername(string username)
+        {
+            int userId = -1;
+
+            using (SQLiteConnection con = new SQLiteConnection(cs))
+            {
+                con.Open();
+
+                string query = "SELECT id FROM Users WHERE login = @Username;";
+
+                using (SQLiteCommand cmd = new SQLiteCommand(query, con))
+                {
+                    cmd.Parameters.AddWithValue("@Username", username);
+
+                    object result = cmd.ExecuteScalar();
+                    if (result != null && int.TryParse(result.ToString(), out userId))
+                    {
+                        return userId;
+                    }
+                }
+            }
+
+            return userId;
+        }
+
+        private int GetFunctionUserId(int userId, string functionName)
+        {
+            int functionUserId = 0;
+
+            using (con = new SQLiteConnection(cs))
+            {
+                con.Open();
+
+                string query = @"
+            SELECT user
+            FROM Function_users
+            WHERE user = @UserId AND function = (SELECT id FROM Function WHERE name = @FunctionName);";
+
+                using (SQLiteCommand cmd = new SQLiteCommand(query, con))
+                {
+                    cmd.Parameters.AddWithValue("@UserId", userId);
+                    cmd.Parameters.AddWithValue("@FunctionName", functionName);
+
+                    object result = cmd.ExecuteScalar();
+
+                    if (result != null)
+                    {
+                        functionUserId = Convert.ToInt32(result);
+                    }
+                }
+            }
+
+            return functionUserId;
         }
 
         private void ExecuteMethodByName(string methodName)

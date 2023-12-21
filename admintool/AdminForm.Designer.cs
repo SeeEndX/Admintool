@@ -36,6 +36,7 @@ namespace admintool
             this.btnRemove = new System.Windows.Forms.Button();
             this.dgvUsers = new System.Windows.Forms.DataGridView();
             this.chbChoice = new System.Windows.Forms.DataGridViewCheckBoxColumn();
+            this.btnReport = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.dgvUsers)).BeginInit();
             this.SuspendLayout();
             // 
@@ -107,12 +108,23 @@ namespace admintool
             this.chbChoice.TrueValue = "True";
             this.chbChoice.Width = 60;
             // 
+            // btnReport
+            // 
+            this.btnReport.Location = new System.Drawing.Point(586, 324);
+            this.btnReport.Name = "btnReport";
+            this.btnReport.Size = new System.Drawing.Size(105, 40);
+            this.btnReport.TabIndex = 6;
+            this.btnReport.Text = "Отчет";
+            this.btnReport.UseVisualStyleBackColor = true;
+            this.btnReport.Click += new System.EventHandler(this.btnReport_Click);
+            // 
             // AdminForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.ButtonHighlight;
             this.ClientSize = new System.Drawing.Size(739, 430);
+            this.Controls.Add(this.btnReport);
             this.Controls.Add(this.dgvUsers);
             this.Controls.Add(this.btnRemove);
             this.Controls.Add(this.btnEdit);
@@ -120,7 +132,7 @@ namespace admintool
             this.Controls.Add(this.btnAdd);
             this.Name = "AdminForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "AdminForm";
+            this.Text = "Панель администратора";
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.AdminForm_FormClosed);
             ((System.ComponentModel.ISupportInitialize)(this.dgvUsers)).EndInit();
             this.ResumeLayout(false);
@@ -135,6 +147,7 @@ namespace admintool
         private System.Windows.Forms.Button btnRemove;
         private System.Windows.Forms.DataGridView dgvUsers;
         private DataGridViewCheckBoxColumn chbChoice;
+        private Button btnReport;
     }
 }
 

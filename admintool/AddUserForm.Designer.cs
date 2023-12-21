@@ -150,7 +150,7 @@
             this.Controls.Add(this.btnFunct);
             this.Name = "AddUserForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "AddUserForm";
+            this.Text = "Создание пользователя";
             this.ResumeLayout(false);
             this.PerformLayout();
 

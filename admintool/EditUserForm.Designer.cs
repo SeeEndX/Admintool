@@ -150,7 +150,7 @@
             this.Controls.Add(this.btnFunct);
             this.Name = "EditUserForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "EditUserForm";
+            this.Text = "Редактирование пользователя";
             this.ResumeLayout(false);
             this.PerformLayout();
 

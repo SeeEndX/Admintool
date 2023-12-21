@@ -86,7 +86,7 @@
             this.Controls.Add(this.functionList);
             this.Name = "AddFunctionsForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "AddFunctionsForm";
+            this.Text = "Добавление функций";
             this.ResumeLayout(false);
             this.PerformLayout();
 

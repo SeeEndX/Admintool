@@ -77,5 +77,10 @@ namespace admintool
                 return BitConverter.ToString(hashedBytes).Replace("-", "").ToLower();
             }
         }
+
+        private void AuthForm_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            Application.Exit();
+        }
     }
 }

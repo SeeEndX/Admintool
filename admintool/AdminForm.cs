@@ -1,9 +1,11 @@
 ﻿using System;
+using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Entity.Core.Common.CommandTrees.ExpressionBuilder;
 using System.Data.SQLite;
 using System.Linq;
+using System.Text;
 using System.Windows.Forms;
 
 namespace admintool
@@ -198,6 +200,26 @@ GROUP BY Users.login;";
         private void AdminForm_FormClosed(object sender, FormClosedEventArgs e)
         {
             Application.Exit();
+        }
+
+        private void btnReport_Click(object sender, EventArgs e)
+        {
+            if (dgvUsers.SelectedCells.Count > 0)
+            {
+                int rowIndex = dgvUsers.SelectedCells[0].RowIndex;
+                int userId = Convert.ToInt32(dgvUsers.Rows[rowIndex].Cells["id"].Value);
+
+                GenerateReport(userId);
+            }
+        }
+
+        private void GenerateReport(int userId)
+        {
+            ViewReportForm viewReportForm = new ViewReportForm(userId);
+            viewReportForm.Tag = this;
+            viewReportForm.FormClosed += (sender, e) => this.Enabled = true;
+            viewReportForm.Show(this);
+            this.Enabled = false;
         }
     }
 }
