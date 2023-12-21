@@ -435,7 +435,7 @@ namespace admintool
                 if (selectedPoolState == "Stopped")
                 {
                     IISManager.StartAppPool(selectedPoolName);
-                    UpdatePoolDataGridView();
+                    UpdateSitesDataGridView();
                     AddReport($"На веб-сервере Microsoft IIS был запущен пул приложений {selectedPoolName}");
                 }
                 else

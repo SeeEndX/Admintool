@@ -34,20 +34,6 @@ namespace admintool
                 }
             }
         }
-
-        private void InitializeComponent()
-        {
-            this.SuspendLayout();
-            // 
-            // ProgForm
-            // 
-            this.ClientSize = new System.Drawing.Size(278, 244);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
-            this.Name = "ProgForm";
-            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.ResumeLayout(false);
-
-        }
     }
     public partial class ProgForm
     {
