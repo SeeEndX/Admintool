@@ -1,10 +1,7 @@
-﻿using System;
+﻿using Microsoft.Web.Administration;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.IO;
 
 namespace admintool
 {
@@ -38,11 +35,18 @@ namespace admintool
             }
         }
     }
-
     public partial class ProgForm
     {
         public partial class FunctionExecutor
         {
+            private void CreateSite(string siteName, string physicalPath, int port)
+            {
+                using (ServerManager serverManager = new ServerManager())
+                {
+                    Site newSite = serverManager.Sites.Add(siteName, "http", $"*:{port}:", physicalPath);
+                    serverManager.CommitChanges();
+                }
+            }
 
             private void AddPool()
             {
