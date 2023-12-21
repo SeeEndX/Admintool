@@ -84,6 +84,7 @@
             this.Controls.Add(this.btnSave);
             this.Controls.Add(this.lbl1);
             this.Controls.Add(this.functionList);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Name = "AddFunctionsForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Добавление функций";

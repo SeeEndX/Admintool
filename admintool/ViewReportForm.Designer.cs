@@ -45,7 +45,7 @@
             // 
             // btnLogout
             // 
-            this.btnLogout.Location = new System.Drawing.Point(381, 234);
+            this.btnLogout.Location = new System.Drawing.Point(381, 336);
             this.btnLogout.Name = "btnLogout";
             this.btnLogout.Size = new System.Drawing.Size(102, 45);
             this.btnLogout.TabIndex = 2;
@@ -55,11 +55,11 @@
             // 
             // rtbReports
             // 
-            this.rtbReports.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.rtbReports.Location = new System.Drawing.Point(12, 41);
+            this.rtbReports.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.rtbReports.Location = new System.Drawing.Point(12, 54);
             this.rtbReports.Name = "rtbReports";
             this.rtbReports.ReadOnly = true;
-            this.rtbReports.Size = new System.Drawing.Size(471, 187);
+            this.rtbReports.Size = new System.Drawing.Size(471, 276);
             this.rtbReports.TabIndex = 3;
             this.rtbReports.Text = "";
             // 
@@ -67,10 +67,11 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(495, 291);
+            this.ClientSize = new System.Drawing.Size(495, 393);
             this.Controls.Add(this.rtbReports);
             this.Controls.Add(this.btnLogout);
             this.Controls.Add(this.label1);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Name = "ViewReportForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Просмотр отчета";

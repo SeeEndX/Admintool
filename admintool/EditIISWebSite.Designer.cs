@@ -118,7 +118,9 @@
             this.Controls.Add(this.btnEdit);
             this.Controls.Add(this.tbName);
             this.Controls.Add(this.label1);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Name = "EditIISWebSite";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "EditIISWebSite";
             this.ResumeLayout(false);
             this.PerformLayout();

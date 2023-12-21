@@ -334,6 +334,9 @@
     <EmbeddedResource Include="EditUserForm.resx">
       <DependentUpon>EditUserForm.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="FunctionExecutor.resx">
+      <DependentUpon>FunctionExecutor.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="ProgForm.resx">
       <DependentUpon>ProgForm.cs</DependentUpon>
     </EmbeddedResource>

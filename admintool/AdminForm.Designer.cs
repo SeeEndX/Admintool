@@ -130,6 +130,7 @@ namespace admintool
             this.Controls.Add(this.btnEdit);
             this.Controls.Add(this.btnLogout);
             this.Controls.Add(this.btnAdd);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Name = "AdminForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Панель администратора";

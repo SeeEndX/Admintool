@@ -114,7 +114,7 @@
             // 
             // button2
             // 
-            this.button2.Location = new System.Drawing.Point(510, 270);
+            this.button2.Location = new System.Drawing.Point(618, 270);
             this.button2.Name = "button2";
             this.button2.Size = new System.Drawing.Size(144, 50);
             this.button2.TabIndex = 1;
@@ -198,7 +198,7 @@
             this.dgvSites.ReadOnly = true;
             this.dgvSites.RowHeadersWidth = 62;
             this.dgvSites.RowTemplate.Height = 28;
-            this.dgvSites.Size = new System.Drawing.Size(726, 206);
+            this.dgvSites.Size = new System.Drawing.Size(726, 198);
             this.dgvSites.TabIndex = 1;
             // 
             // btnAddSite
@@ -229,7 +229,7 @@
             // 
             // btnStopPool
             // 
-            this.btnStopPool.Location = new System.Drawing.Point(612, 248);
+            this.btnStopPool.Location = new System.Drawing.Point(606, 244);
             this.btnStopPool.Name = "btnStopPool";
             this.btnStopPool.Size = new System.Drawing.Size(142, 50);
             this.btnStopPool.TabIndex = 10;
@@ -239,7 +239,7 @@
             // 
             // btnStartPool
             // 
-            this.btnStartPool.Location = new System.Drawing.Point(465, 248);
+            this.btnStartPool.Location = new System.Drawing.Point(459, 244);
             this.btnStartPool.Name = "btnStartPool";
             this.btnStartPool.Size = new System.Drawing.Size(141, 50);
             this.btnStartPool.TabIndex = 9;
@@ -250,7 +250,7 @@
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(35, 16);
+            this.label4.Location = new System.Drawing.Point(33, 7);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(189, 25);
             this.label4.TabIndex = 8;
@@ -258,7 +258,7 @@
             // 
             // btnDeletePool
             // 
-            this.btnDeletePool.Location = new System.Drawing.Point(301, 248);
+            this.btnDeletePool.Location = new System.Drawing.Point(295, 244);
             this.btnDeletePool.Name = "btnDeletePool";
             this.btnDeletePool.Size = new System.Drawing.Size(130, 50);
             this.btnDeletePool.TabIndex = 7;
@@ -268,7 +268,7 @@
             // 
             // btnEditPool
             // 
-            this.btnEditPool.Location = new System.Drawing.Point(165, 248);
+            this.btnEditPool.Location = new System.Drawing.Point(159, 244);
             this.btnEditPool.Name = "btnEditPool";
             this.btnEditPool.Size = new System.Drawing.Size(130, 50);
             this.btnEditPool.TabIndex = 6;
@@ -282,7 +282,7 @@
             this.dgvPool.AllowUserToDeleteRows = false;
             this.dgvPool.BackgroundColor = System.Drawing.SystemColors.ButtonHighlight;
             this.dgvPool.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dgvPool.Location = new System.Drawing.Point(28, 44);
+            this.dgvPool.Location = new System.Drawing.Point(22, 32);
             this.dgvPool.Name = "dgvPool";
             this.dgvPool.ReadOnly = true;
             this.dgvPool.RowHeadersWidth = 62;
@@ -292,7 +292,7 @@
             // 
             // btnAddPool
             // 
-            this.btnAddPool.Location = new System.Drawing.Point(28, 248);
+            this.btnAddPool.Location = new System.Drawing.Point(22, 244);
             this.btnAddPool.Name = "btnAddPool";
             this.btnAddPool.Size = new System.Drawing.Size(131, 50);
             this.btnAddPool.TabIndex = 4;
@@ -322,6 +322,7 @@
             this.Controls.Add(this.btnExit);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.lbHello);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Name = "ProgForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Форма операций";

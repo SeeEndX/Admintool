@@ -148,6 +148,7 @@
             this.Controls.Add(this.label2);
             this.Controls.Add(this.tbLogin);
             this.Controls.Add(this.btnFunct);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Name = "EditUserForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Редактирование пользователя";
