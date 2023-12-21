@@ -18,61 +18,59 @@ namespace admintool
         SQLiteCommand cmd;
 
         private int user;
-        private List<string> reports;
+        private string username;
 
         public ViewReportForm(int userId)
         {
             InitializeComponent();
             user = userId;
+            GetReportsForUser(user);
         }
 
-        private void GetReport()
+        private void GetReportsForUser(int user)
         {
-            lbActions.Items.Clear();
-
-            reports = GetReportsForUser(user);
-
-            foreach (var report in reports)
-            {
-                lbActions.Items.Add(report);
-            }
-        }
-
-        private List<string> GetReportsForUser(int user)
-        {
-            List<string> functions = new List<string>();
-
             using (con = new SQLiteConnection(cs))
             {
                 con.Open();
 
-                //переписать
                 string query = @"
-            SELECT f.name
-            FROM Function f
-            JOIN Function_users fu ON f.id = fu.function
-            JOIN Users u ON u.id = fu.user
-            WHERE u.login = @User;";
+SELECT
+    users.login AS UserName,
+    function.name AS FunctionName,
+    function.description AS FunctionDescription,
+    reports.time AS ExecutionTime
+FROM reports_functions
+JOIN reports ON reports_functions.report = reports.id
+JOIN function_users ON reports_functions.function_user = function_users.id
+JOIN users ON function_users.user = users.id
+JOIN function ON function_users.function = function.id
+WHERE users.id = @User;";
 
                 using (cmd = new SQLiteCommand(query, con))
                 {
-                    //переписать
                     cmd.Parameters.AddWithValue("@User", user);
 
                     using (SQLiteDataReader reader = cmd.ExecuteReader())
                     {
                         while (reader.Read())
                         {
-                            //переписать
-                            string reports = reader.GetString(0);
-                            //переписать
-                            functions.Add(reports);
+                            string userName = reader["UserName"].ToString();
+                            string functionName = reader["FunctionName"].ToString();
+                            string functionDescription = reader["FunctionDescription"].ToString();
+                            string executionTime = reader["ExecutionTime"].ToString();
+                            username = userName;
+                            string reportEntry = $"Выполнена функция {functionName}\n ({functionDescription})\nв ({executionTime})\n\n";
+                            rtbReports.Text += reportEntry;
                         }
                     }
                 }
             }
+            label1.Text += username;
+        }
 
-            return functions;
+        private void btnLogout_Click(object sender, EventArgs e)
+        {
+            Close();
         }
     }
 }
