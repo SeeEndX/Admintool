@@ -52,15 +52,22 @@ WHERE users.id = @User;";
 
                     using (SQLiteDataReader reader = cmd.ExecuteReader())
                     {
-                        while (reader.Read())
+                        if (reader.HasRows)
                         {
-                            string userName = reader["UserName"].ToString();
-                            string functionName = reader["FunctionName"].ToString();
-                            string functionDescription = reader["FunctionDescription"].ToString();
-                            string executionTime = reader["ExecutionTime"].ToString();
-                            username = userName;
-                            string reportEntry = $"Выполнена функция {functionName}\n ({functionDescription})\nв ({executionTime})\n\n";
-                            rtbReports.Text += reportEntry;
+                            while (reader.Read())
+                            {
+                                string userName = reader["UserName"].ToString();
+                                string functionName = reader["FunctionName"].ToString();
+                                string functionDescription = reader["FunctionDescription"].ToString();
+                                string executionTime = reader["ExecutionTime"].ToString();
+                                username = userName;
+                                string reportEntry = $"Выполнена функция {functionName}\n ({functionDescription})\nв ({executionTime})\n\n";
+                                rtbReports.Text += reportEntry;
+                            }
+                        }
+                        else
+                        {
+                            rtbReports.Text = "Пользователь еще не запускал функции.";
                         }
                     }
                 }
