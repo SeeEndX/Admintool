@@ -432,10 +432,10 @@ namespace admintool
                 string selectedPoolName = dgvPool.Rows[rowIndex].Cells["PoolName"].Value.ToString();
                 string selectedPoolState = dgvPool.Rows[rowIndex].Cells["PoolState"].Value.ToString();
 
-                if (selectedPoolState == "Stopped")
+                if (selectedPoolState.Contains("Stopped"))
                 {
                     IISManager.StartAppPool(selectedPoolName);
-                    UpdateSitesDataGridView();
+                    UpdatePoolDataGridView();
                     AddReport($"На веб-сервере Microsoft IIS был запущен пул приложений {selectedPoolName}");
                 }
                 else
@@ -458,7 +458,7 @@ namespace admintool
                 string selectedPoolName = dgvPool.Rows[rowIndex].Cells["PoolName"].Value.ToString();
                 string selectedPoolState = dgvPool.Rows[rowIndex].Cells["PoolState"].Value.ToString();
 
-                if (selectedPoolState == "Started")
+                if (selectedPoolState.Contains("Started"))
                 {
                     IISManager.StopAppPool(selectedPoolName);
                     UpdatePoolDataGridView();

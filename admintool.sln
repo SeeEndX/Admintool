@@ -5,6 +5,8 @@ VisualStudioVersion = 17.7.34031.279
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "admintool", "admintool\admintool.csproj", "{6C932DD4-1D8E-4494-95FD-08F7BF0F5B6F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AdminService", "..\..\!ВКР\AdminService\AdminService\AdminService.csproj", "{42FB9205-7DF5-4181-BDC0-D7FF878FCADE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{6C932DD4-1D8E-4494-95FD-08F7BF0F5B6F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6C932DD4-1D8E-4494-95FD-08F7BF0F5B6F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6C932DD4-1D8E-4494-95FD-08F7BF0F5B6F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{42FB9205-7DF5-4181-BDC0-D7FF878FCADE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{42FB9205-7DF5-4181-BDC0-D7FF878FCADE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{42FB9205-7DF5-4181-BDC0-D7FF878FCADE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{42FB9205-7DF5-4181-BDC0-D7FF878FCADE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

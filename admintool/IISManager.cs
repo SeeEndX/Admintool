@@ -273,7 +273,6 @@ namespace admintool
                         {
                             appPool.Start();
                             serverManager.CommitChanges();
-
                             MessageBox.Show($"Пул приложений '{appPoolName}' успешно запущен.", "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);
                         }
                         else
@@ -307,7 +306,7 @@ namespace admintool
                         {
                             appPool.Stop();
                             serverManager.CommitChanges();
-                            MessageBox.Show($"Пул приложений '{appPoolName}' успешно запущен.", "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                            MessageBox.Show($"Пул приложений '{appPoolName}' успешно остановлен.", "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);
                         }
                         else
                         {
