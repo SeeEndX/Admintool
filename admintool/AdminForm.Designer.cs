@@ -36,7 +36,6 @@ namespace admintool
             this.btnRemove = new System.Windows.Forms.Button();
             this.dgvUsers = new System.Windows.Forms.DataGridView();
             this.btnReport = new System.Windows.Forms.Button();
-            this.button1 = new System.Windows.Forms.Button();
             this.chbChoice = new System.Windows.Forms.DataGridViewCheckBoxColumn();
             ((System.ComponentModel.ISupportInitialize)(this.dgvUsers)).BeginInit();
             this.SuspendLayout();
@@ -108,16 +107,6 @@ namespace admintool
             this.btnReport.UseVisualStyleBackColor = true;
             this.btnReport.Click += new System.EventHandler(this.btnReport_Click);
             // 
-            // button1
-            // 
-            this.button1.Location = new System.Drawing.Point(56, 383);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(103, 36);
-            this.button1.TabIndex = 7;
-            this.button1.Text = "Обновить";
-            this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.button1_Click);
-            // 
             // chbChoice
             // 
             this.chbChoice.FalseValue = "False";
@@ -135,7 +124,6 @@ namespace admintool
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.ButtonHighlight;
             this.ClientSize = new System.Drawing.Size(739, 430);
-            this.Controls.Add(this.button1);
             this.Controls.Add(this.btnReport);
             this.Controls.Add(this.dgvUsers);
             this.Controls.Add(this.btnRemove);
@@ -160,7 +148,6 @@ namespace admintool
         private System.Windows.Forms.Button btnRemove;
         private System.Windows.Forms.DataGridView dgvUsers;
         private Button btnReport;
-        private Button button1;
         private DataGridViewCheckBoxColumn chbChoice;
     }
 }

@@ -63,8 +63,16 @@ namespace admintool
         {
             AddUserForm addUserForm = new AddUserForm(serviceClient);
             addUserForm.Tag = this;
+            addUserForm.FormClosed += AddUserForm_FormClosed;
             addUserForm.Show(this);
+
             this.Enabled = false;
+        }
+
+        private void AddUserForm_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            this.Enabled = true;
+            GetData();
         }
 
         private void btnEdit_Click(object sender, EventArgs e)
@@ -81,8 +89,8 @@ namespace admintool
 
                 EditUserForm editUserForm = new EditUserForm(selectedUsername);
                 editUserForm.Tag = this;
-                editUserForm.FormClosed += (sender, e) => this.Enabled = true;
-                editUserForm.DataUpdated += (sender, e) => dgvUsers.DataSource = serviceClient.GetUsersData();
+                editUserForm.FormClosed += (sender, e) => GetData();
+                editUserForm.DataUpdated += (sender, e) => GetData();
                 editUserForm.Show(this);
                 this.Enabled = false;
             }
@@ -189,11 +197,6 @@ namespace admintool
             viewReportForm.FormClosed += (sender, e) => this.Enabled = true;
             viewReportForm.Show(this);
             this.Enabled = false;
-        }
-
-        private void button1_Click(object sender, EventArgs e)
-        {
-            GetData();
         }
     }
 }

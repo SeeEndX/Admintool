@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Data.SQLite;
 using System.Collections;
+using AdminService;
 
 namespace admintool
 {
@@ -167,15 +168,15 @@ WHERE login = @OriginalUsername;";
         private void showFunctionAdd()
         {
             int userId = GetSelectedUserId();
-            List<string> assignedFunctionNames = GetFunctionsAssignedToUser(userId);
-            
-            AddFunctionsForm addFunctionsForm = new AddFunctionsForm(originalUsername);
+            //List<string> assignedFunctionNames = GetFunctionsAssignedToUser(userId);
+            IAdminService serviceClient = null; //убрать потом
+            AddFunctionsForm addFunctionsForm = new AddFunctionsForm(serviceClient ,originalUsername);
             addFunctionsForm.Tag = this;
             addFunctionsForm.FormClosed += (sender, e) => this.Enabled = true;
 
             List<string> allFunctions = GetAllFunctions();
 
-            addFunctionsForm.SetAssignedFunctions(allFunctions, assignedFunctionNames);
+            //addFunctionsForm.SetAssignedFunctions(allFunctions, assignedFunctionNames);
 
             addFunctionsForm.Show(this);
             this.Enabled = false;

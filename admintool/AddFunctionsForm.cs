@@ -1,26 +1,29 @@
-﻿using System;
+﻿using AdminService;
+using System;
 using System.Collections.Generic;
 using System.Data.SQLite;
 using System.Windows.Forms;
+using static AdminService.AdministrativeService;
 
 namespace admintool
 {
     public partial class AddFunctionsForm : Form
     {
-        private string cs = @"URI=file:C:\\Users\\ars_1\\Documents\\dbForAdminProg\\AdminToolDB.db";
-        SQLiteConnection con;
-        SQLiteCommand cmd;
         public event EventHandler FunctionsSaved;
         string user;
+        IAdminService serviceClient;
 
-        public AddFunctionsForm(string username)
+        public AddFunctionsForm(IAdminService serviceClient , string username)
         {
             InitializeComponent();
             user = username;
             lbl1.Text += username;
+            this.serviceClient = serviceClient;
+            RefreshFunctionList();
+            //SetAssignedFunctions(allFunctionNames, assignedFunctionNames);
         }
 
-        public void SetAssignedFunctions(List<string> allFunctionNames, List<string> assignedFunctionNames)
+        /*public void SetAssignedFunctions(List<string> allFunctionNames, List<string> assignedFunctionNames)
         {
             functionList.Items.Clear();
             if (allFunctionNames != null)
@@ -35,6 +38,30 @@ namespace admintool
                     functionList.SetItemChecked(i, isAssigned);
                 }
             }
+        }*/
+
+        private void RefreshFunctionList()
+        {
+            List<string> allFunctionNames = serviceClient.GetAllFunctionNames();
+            List<string> assignedFunctionNames = serviceClient.GetAssignedFunctionNames(user);
+
+            functionList.Items.Clear();
+            if (allFunctionNames != null)
+            {
+                functionList.Items.AddRange(allFunctionNames.ToArray());
+            }
+
+            if (assignedFunctionNames != null)
+            {
+                foreach (string functionName in assignedFunctionNames)
+                {
+                    int index = functionList.Items.IndexOf(functionName);
+                    if (index >= 0)
+                    {
+                        functionList.SetItemChecked(index, true);
+                    }
+                }
+            }
         }
 
         private void btnBack_Click(object sender, EventArgs e)
@@ -44,84 +71,15 @@ namespace admintool
 
         private void btnSave_Click(object sender, EventArgs e)
         {
-            int userId = GetSelectedUserId(user);
-            using (con = new SQLiteConnection(cs))
+            List<string> selectedFunctionNames = new List<string>();
+            foreach (string functionName in functionList.CheckedItems)
             {
-                con.Open();
-                string deleteQuery = "DELETE FROM Function_users WHERE user = @UserId;";
-                using (SQLiteCommand deleteCmd = new SQLiteCommand(deleteQuery, con))
-                {
-                    deleteCmd.Parameters.AddWithValue("@UserId", userId);
-                    deleteCmd.ExecuteNonQuery();
-                }
-
-                string insertQuery = "INSERT INTO Function_users (user, function) VALUES (@UserId, @FunctionId);";
-                using (SQLiteCommand insertCmd = new SQLiteCommand(insertQuery, con))
-                {
-                    insertCmd.Parameters.AddWithValue("@UserId", userId);
-
-                    foreach (string functionName in functionList.CheckedItems)
-                    {
-                        int functionId = GetFunctionIdByName(functionName);
-
-                        if (functionId > 0)
-                        {
-                            insertCmd.Parameters.Clear();
-                            insertCmd.Parameters.AddWithValue("@UserId", userId);
-                            insertCmd.Parameters.AddWithValue("@FunctionId", functionId);
-                            insertCmd.ExecuteNonQuery();
-                        }
-                    }
-                }
+                selectedFunctionNames.Add(functionName);
             }
+
+            serviceClient.SaveAssignedFunctions(user, selectedFunctionNames);
             FunctionsSaved?.Invoke(this, EventArgs.Empty);
             MessageBox.Show("Данные сохранены!", "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);
-        }
-
-        private int GetSelectedUserId(string username)
-        {
-            using (con = new SQLiteConnection(cs))
-            {
-                con.Open();
-
-                string query = "SELECT id FROM Users WHERE login = @Username;";
-                using (cmd = new SQLiteCommand(query, con))
-                {
-                    cmd.Parameters.AddWithValue("@Username", username);
-                    object result = cmd.ExecuteScalar();
-
-                    if (result != null && int.TryParse(result.ToString(), out int userId))
-                    {
-                        con.Close();
-                        return userId;
-                    }
-                    con.Close();
-                    return 0;
-                }
-            }
-        }
-
-        private int GetFunctionIdByName(string functionName)
-        {
-            using (con = new SQLiteConnection(cs))
-            {
-                con.Open();
-
-                string query = "SELECT id FROM Function WHERE name = @FunctionName;";
-                using (cmd = new SQLiteCommand(query, con))
-                {
-                    cmd.Parameters.AddWithValue("@FunctionName", functionName);
-                    object result = cmd.ExecuteScalar();
-
-                    if (result != null && int.TryParse(result.ToString(), out int functionId))
-                    {
-                        con.Close();
-                        return functionId;
-                    }
-                    con.Close();
-                    return 0;
-                }
-            }
         }
     }
 }

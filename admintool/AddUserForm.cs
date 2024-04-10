@@ -15,10 +15,11 @@ namespace admintool
         public event EventHandler DataAdded;
 
         public event EventHandler FunctButtonClicked;
-        private bool isFunctClicked = false;
+        private bool isFunctClicked;
         public AddUserForm(IAdminService serviceClient)
         {
             InitializeComponent();
+            this.serviceClient = serviceClient;
             FunctButtonClicked += (sender, e) => isFunctClicked = true;
         }
 
@@ -28,72 +29,33 @@ namespace admintool
             string newPassword = tbPass.Text;
             string newPasswordConf = tbPass2.Text;
 
-            if (isFunctClicked)
+            if (newUsername != "" && newPassword != "" && newPasswordConf != "")
             {
-                isFunctClicked = false;
-                OnDataAdded();
-                MessageBox.Show("Пользователь был успешно добавлен при назначении функций.", "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            }
-            else
-            {
-                if (newUsername != "" && newPassword != "" && newPasswordConf != "")
+                if (!serviceClient.IsUserExists(newUsername) && newPassword != newPasswordConf)
                 {
-                    if (IsUserExists(newUsername))
-                    {
-                        MessageBox.Show("Пользователь с таким логином уже существует.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        return;
-                    }
-                    else if (newPassword != newPasswordConf)
-                    {
-                        MessageBox.Show("Пароли не совпадают.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        return;
-                    }
-
-                    int userId = serviceClient.GetSelectedUserId(newUsername);
-
-                    if (!string.IsNullOrEmpty(newPassword))
-                    {
-                        if (userId > 0)
-                        {
-                            serviceClient.UpdatePass(userId, newPassword);
-                            OnDataAdded();
-                        }
-                        else if (AddUser(newUsername, newPassword))
-                        {
-                            MessageBox.Show("Пользователь успешно добавлен.", "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                            ClearFields();
-                            OnDataAdded();
-                        }
-                    }
-                    else
-                    {
-                        MessageBox.Show("Заполните все поля!", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
+                    MessageBox.Show("Пароли не совпадают.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+                else if (!serviceClient.IsUserExists(newUsername) && AddUser(newUsername, newPassword))
+                {
+                    MessageBox.Show("Пользователь успешно добавлен.", "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return;
                 }
                 else
                 {
-                    MessageBox.Show("Заполните все поля!", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show("Пользователь с таким логином уже существует.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
                 }
+            }
+            else
+            {
+                MessageBox.Show("Заполните все поля!", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
         protected virtual void OnDataAdded()
         {
             DataAdded?.Invoke(this, EventArgs.Empty);
-        }
-
-        private bool IsUserExists(string login)
-        {
-            string cmdText = "SELECT COUNT(*) FROM Users WHERE login = @Login";
-            con = new SQLiteConnection(cs);
-            con.Open();
-            using (cmd = new SQLiteCommand(cmdText, con))
-            {
-                cmd.Parameters.AddWithValue("@Login", login);
-                int userCount = Convert.ToInt32(cmd.ExecuteScalar());
-                con.Close();
-                return userCount > 0;
-            }
         }
 
         private bool AddUser(string login, string password)
@@ -121,6 +83,11 @@ namespace admintool
             {
                 MessageBox.Show("Сначала введите учетные данные!", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+            else if (serviceClient.IsUserExists(tbLogin.Text))
+            {
+                user = tbLogin.Text;
+                showFunctionAdd(user);
+            }
             else
             {
                 user = tbLogin.Text;
@@ -129,41 +96,11 @@ namespace admintool
             }
         }
 
-        private List<string> GetAllFunctions()
-        {
-            List<string> allFunctions = new List<string>();
-
-            using (con = new SQLiteConnection(cs))
-            {
-                con.Open();
-
-                string query = "SELECT name FROM Function;";
-
-                using (SQLiteCommand cmd = new SQLiteCommand(query, con))
-                {
-                    using (SQLiteDataReader reader = cmd.ExecuteReader())
-                    {
-                        while (reader.Read())
-                        {
-                            string functionName = reader.GetString(0);
-                            allFunctions.Add(functionName);
-                        }
-                    }
-                }
-                con.Close();
-            }
-
-            return allFunctions;
-        }
-
         private void showFunctionAdd(string user)
         {
-            List<string> allFunctions = GetAllFunctions();
-            List<string> assignedFunctions = null;
-            AddFunctionsForm addFunctionsForm = new AddFunctionsForm(user);
+            List<string> allFunctions = serviceClient.GetFunctions();
+            AddFunctionsForm addFunctionsForm = new AddFunctionsForm(serviceClient, user);
             addFunctionsForm.Tag = this;
-
-            addFunctionsForm.SetAssignedFunctions(allFunctions, assignedFunctions);
 
             addFunctionsForm.FormClosed += (sender, e) => this.Enabled = true;
             addFunctionsForm.Show(this);
