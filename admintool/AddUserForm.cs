@@ -2,21 +2,21 @@
 using System.Windows.Forms;
 using System.Data.SQLite;
 using System.Collections.Generic;
+using AdminService;
+using System.Drawing;
 
 namespace admintool
 {
     public partial class AddUserForm : Form
     {
-        private string cs = @"URI=file:C:\\Users\\ars_1\\Documents\\dbForAdminProg\\AdminToolDB.db";
-        SQLiteConnection con;
-        SQLiteCommand cmd;
+        IAdminService serviceClient;
         private string user;
 
         public event EventHandler DataAdded;
 
         public event EventHandler FunctButtonClicked;
         private bool isFunctClicked = false;
-        public AddUserForm()
+        public AddUserForm(IAdminService serviceClient)
         {
             InitializeComponent();
             FunctButtonClicked += (sender, e) => isFunctClicked = true;
@@ -49,36 +49,25 @@ namespace admintool
                         return;
                     }
 
-                    int userId = GetSelectedUserId(newUsername);
+                    int userId = serviceClient.GetSelectedUserId(newUsername);
 
-                    using (con = new SQLiteConnection(cs))
+                    if (!string.IsNullOrEmpty(newPassword))
                     {
-                        con.Open();
-
-                        if (!string.IsNullOrEmpty(newPassword))
+                        if (userId > 0)
                         {
-                            if (userId > 0)
-                            {
-                                string updatePasswordQuery = "UPDATE Users SET password = @Password WHERE id = @UserId;";
-                                using (SQLiteCommand updatePasswordCmd = new SQLiteCommand(updatePasswordQuery, con))
-                                {
-                                    updatePasswordCmd.Parameters.AddWithValue("@UserId", userId);
-                                    updatePasswordCmd.Parameters.AddWithValue("@Password", newPassword);
-                                    updatePasswordCmd.ExecuteNonQuery();
-                                    OnDataAdded();
-                                }
-                            }
-                            else if (AddUser(newUsername, newPassword))
-                            {
-                                MessageBox.Show("Пользователь успешно добавлен.", "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                                ClearFields();
-                                OnDataAdded();
-                            }
+                            serviceClient.UpdatePass(userId, newPassword);
+                            OnDataAdded();
                         }
-                        else
+                        else if (AddUser(newUsername, newPassword))
                         {
-                            MessageBox.Show("Заполните все поля!", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            MessageBox.Show("Пользователь успешно добавлен.", "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                            ClearFields();
+                            OnDataAdded();
                         }
+                    }
+                    else
+                    {
+                        MessageBox.Show("Заполните все поля!", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                 }
                 else
@@ -86,32 +75,6 @@ namespace admintool
                     MessageBox.Show("Заполните все поля!", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
-        }
-
-        private int GetSelectedUserId(string username)
-        {
-            int userId = -1;
-
-            string query = "SELECT id FROM Users WHERE login = @username";
-
-            using (con = new SQLiteConnection(cs))
-            {
-                con.Open();
-
-                using (SQLiteCommand command = new SQLiteCommand(query, con))
-                {
-                    command.Parameters.Add(new SQLiteParameter("@username", username));
-
-                    object result = command.ExecuteScalar();
-                    if (result != null && int.TryParse(result.ToString(), out userId))
-                    {
-                        return userId;
-                    }
-                }
-                con.Close();
-            }
-
-            return userId;
         }
 
         protected virtual void OnDataAdded()
@@ -135,19 +98,8 @@ namespace admintool
 
         private bool AddUser(string login, string password)
         {
-            string cmdText = "INSERT INTO Users (login, password, usergroup) VALUES (@Login, @Password, @Group)";
-            con = new SQLiteConnection(cs);
-            con.Open();
-            using (cmd = new SQLiteCommand(cmdText, con))
-            {
-                cmd.Parameters.AddWithValue("@Login", login);
-                cmd.Parameters.AddWithValue("@Password", password);
-                cmd.Parameters.AddWithValue("@Group", "Dev");
-
-                int rowsAffected = cmd.ExecuteNonQuery();
-                con.Close();
-                return rowsAffected > 0;
-            }
+            int rowsAffected = serviceClient.AddUser(login, password);
+            return rowsAffected > 0;
         }
 
         private void ClearFields()

@@ -10,9 +10,22 @@ namespace admintool
 {
     public partial class AuthForm : Form
     {
+        IAdminService serviceClient;
+
         public AuthForm()
         {
             InitializeComponent();
+            InitializeServiceClient();
+        }
+
+        private void InitializeServiceClient()
+        {
+            var binding = new NetTcpBinding();
+            binding.SendTimeout = TimeSpan.FromSeconds(120);
+            ChannelFactory<IAdminService> channelFactory =
+                new ChannelFactory<IAdminService>(binding,
+                new EndpointAddress("net.tcp://localhost:8000/AdminService"));
+            serviceClient = channelFactory.CreateChannel();
         }
 
         private void btnLogin_Click(object sender, EventArgs e)
@@ -25,30 +38,23 @@ namespace admintool
             string login = tbLogin.Text;
             string password = tbPass.Text;
 
-            ChannelFactory<IAdminService> channelFactory =
-                new ChannelFactory<IAdminService>(new NetTcpBinding(),
-                new EndpointAddress("net.tcp://localhost:8000/AdminService"));
-            IAdminService serviceClient = channelFactory.CreateChannel();
             User user = serviceClient.Authenticate(login, password);
 
             if (user != null)
             {
                 if (user.Group == "Admin")
                 {
-                    /*AdminForm adminForm = new AdminForm();
+                    AdminForm adminForm = new AdminForm(serviceClient);
                     adminForm.Tag = this;
                     adminForm.Show(this);
-                    Hide();*/
-                    MessageBox.Show($"ЗБС! Админ {user.Login}");
-
+                    Hide();
                 }
                 else if (user.Group == "Dev")
                 {
-                    MessageBox.Show($"ЗБС! Разраб {user.Login}");
-                    /*ProgForm progForm = new ProgForm(user.Login);
+                    ProgForm progForm = new ProgForm(user.Login);
                     progForm.Tag = this;
                     progForm.Show(this);
-                    Hide();*/
+                    Hide();
                 }
             }
             else
@@ -69,11 +75,6 @@ namespace admintool
         private void AuthForm_FormClosed(object sender, FormClosedEventArgs e)
         {
             Application.Exit();
-        }
-
-        private void AuthForm_Load(object sender, EventArgs e)
-        {
-            
         }
     }
 }
