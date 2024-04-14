@@ -14,12 +14,6 @@ namespace admintool
             public FunctionExecutor(Dictionary<string, Action> dictionary)
             {
                 functionDictionary = dictionary;
-                initDictionary();
-            }
-
-            private void initDictionary()
-            {
-                functionDictionary["Add a pool"] = AddPool;
             }
 
             public void ExecuteMethodByName(string methodName)
@@ -32,25 +26,6 @@ namespace admintool
                 {
                     MessageBox.Show($"Метод '{methodName}' не найден.");
                 }
-            }
-        }
-    }
-    public partial class ProgForm
-    {
-        public partial class FunctionExecutor
-        {
-            private void CreateSite(string siteName, string physicalPath, int port)
-            {
-                using (ServerManager serverManager = new ServerManager())
-                {
-                    Site newSite = serverManager.Sites.Add(siteName, "http", $"*:{port}:", physicalPath);
-                    serverManager.CommitChanges();
-                }
-            }
-
-            private void AddPool()
-            {
-                MessageBox.Show("Выполнено Add a pool");
             }
         }
     }
