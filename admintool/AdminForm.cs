@@ -87,10 +87,9 @@ namespace admintool
                 int rowIndex = dgvUsers.SelectedCells[0].RowIndex;
                 string selectedUsername = dgvUsers.Rows[rowIndex].Cells["Пользователь"].Value.ToString();
 
-                EditUserForm editUserForm = new EditUserForm(selectedUsername);
+                EditUserForm editUserForm = new EditUserForm(selectedUsername, serviceClient);
                 editUserForm.Tag = this;
-                editUserForm.FormClosed += (sender, e) => GetData();
-                editUserForm.DataUpdated += (sender, e) => GetData();
+                editUserForm.FormClosed += EditUserForm_FormClosed;
                 editUserForm.Show(this);
                 this.Enabled = false;
             }
@@ -98,6 +97,12 @@ namespace admintool
             {
                 MessageBox.Show("Выберите пользователя для редактирования.");
             }
+        }
+
+        private void EditUserForm_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            this.Enabled = true;
+            GetData();
         }
 
         private void btnRemove_Click(object sender, EventArgs e)

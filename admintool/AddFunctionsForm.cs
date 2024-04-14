@@ -20,25 +20,7 @@ namespace admintool
             lbl1.Text += username;
             this.serviceClient = serviceClient;
             RefreshFunctionList();
-            //SetAssignedFunctions(allFunctionNames, assignedFunctionNames);
         }
-
-        /*public void SetAssignedFunctions(List<string> allFunctionNames, List<string> assignedFunctionNames)
-        {
-            functionList.Items.Clear();
-            if (allFunctionNames != null)
-                functionList.Items.AddRange(allFunctionNames.ToArray());
-
-            if (assignedFunctionNames != null)
-            {
-                for (int i = 0; i < functionList.Items.Count; i++)
-                {
-                    string functionName = functionList.Items[i].ToString();
-                    bool isAssigned = assignedFunctionNames.Contains(functionName);
-                    functionList.SetItemChecked(i, isAssigned);
-                }
-            }
-        }*/
 
         private void RefreshFunctionList()
         {

@@ -12,8 +12,6 @@ namespace admintool
         IAdminService serviceClient;
         private string user;
 
-        public event EventHandler DataAdded;
-
         public event EventHandler FunctButtonClicked;
         private bool isFunctClicked;
         public AddUserForm(IAdminService serviceClient)
@@ -51,11 +49,6 @@ namespace admintool
             {
                 MessageBox.Show("Заполните все поля!", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-        }
-
-        protected virtual void OnDataAdded()
-        {
-            DataAdded?.Invoke(this, EventArgs.Empty);
         }
 
         private bool AddUser(string login, string password)
