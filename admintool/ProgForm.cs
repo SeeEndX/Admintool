@@ -13,7 +13,7 @@ namespace admintool
         private Dictionary<string, Action> functionDictionary = new Dictionary<string, Action>();
         Dictionary<string, TabPage> functionTabs;
 
-        AdminService.IISManager iisManager = new AdminService.IISManager();
+        IISManager iisManager = new IISManager();
 
         public ProgForm(string user)
         {
@@ -26,7 +26,7 @@ namespace admintool
         private void InitData()
         {
             InitializeTabs();
-            AdminService.FunctionExecutor executor = new AdminService.FunctionExecutor(functionDictionary);
+            FunctionExecutor executor = new FunctionExecutor(functionDictionary);
             dgvSitesInit();
             dgvPoolInit();
             if (tabManageSite != null)
@@ -61,7 +61,7 @@ namespace admintool
                 { "Управление пулами", tabManagePool }
             };
             HideAllTabs();
-            List<AdminService.IISManager.ActionItem> userFunctions = iisManager.GetFunctionsForUser(currentUser);
+            List<IISManager.ActionItem> userFunctions = iisManager.GetFunctionsForUser(currentUser);
 
             ShowTabs(userFunctions);
 
@@ -75,17 +75,17 @@ namespace admintool
 
         private void UpdateSitesDataGridView()
         {
-            List<AdminService.IISManager.SiteInfo> listOfSites = iisManager.GetListOfSites();
+            List<IISManager.SiteInfo> listOfSites = iisManager.GetListOfSites();
 
             dgvSites.Rows.Clear();
 
-            foreach (AdminService.IISManager.SiteInfo site in listOfSites)
+            foreach (IISManager.SiteInfo site in listOfSites)
             {
                 dgvSites.Rows.Add(site.Name, site.State, site.Bindings);
             }
         }
 
-        private void ShowTabs(List<AdminService.IISManager.ActionItem> functionNames)
+        private void ShowTabs(List<IISManager.ActionItem> functionNames)
         {
             foreach (var functionName in functionNames)
             {
@@ -345,11 +345,11 @@ namespace admintool
 
         private void UpdatePoolDataGridView()
         {
-            List<AdminService.IISManager.AppPoolInfo> listOfAppPools = iisManager.GetListOfAppPools();
+            List<IISManager.AppPoolInfo> listOfAppPools = iisManager.GetListOfAppPools();
 
             dgvPool.Rows.Clear();
 
-            foreach (AdminService.IISManager.AppPoolInfo appPool in listOfAppPools)
+            foreach (IISManager.AppPoolInfo appPool in listOfAppPools)
             {
                 dgvPool.Rows.Add(appPool.Name, appPool.State, appPool.NETCLRVersion, appPool.ManagedPipelineMode);
             }
