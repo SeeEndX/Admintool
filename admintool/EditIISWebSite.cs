@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AdminService;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -15,10 +16,12 @@ namespace admintool
         private string path;
         private string currentName;
         private string newName;
+        IAdminService adminService;
 
-        public EditIISWebSite(string currentName)
+        public EditIISWebSite(IAdminService adminService, string currentName)
         {
             InitializeComponent();
+            this.adminService = adminService;
             this.currentName = currentName;
             tbName.Text = currentName;
         }
@@ -33,7 +36,7 @@ namespace admintool
             {
                 path = tbPath.Text;
                 newName = tbName.Text;
-                IISManager.ModifyWebsite(currentName, newName, path);
+                adminService.ModifyWebsite(currentName, newName, path);
                 Close();
             }
         }

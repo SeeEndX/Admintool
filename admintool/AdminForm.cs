@@ -197,7 +197,7 @@ namespace admintool
 
         private void GenerateReport(int userId)
         {
-            ViewReportForm viewReportForm = new ViewReportForm(userId);
+            ViewReportForm viewReportForm = new ViewReportForm(serviceClient, userId);
             viewReportForm.Tag = this;
             viewReportForm.FormClosed += (sender, e) => this.Enabled = true;
             viewReportForm.Show(this);
