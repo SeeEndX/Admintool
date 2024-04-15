@@ -1,10 +1,12 @@
-﻿using System;
+﻿using AdminService;
+using System;
 using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Entity.Core.Common.CommandTrees.ExpressionBuilder;
 using System.Data.SQLite;
 using System.Linq;
+using System.ServiceModel;
 using System.Text;
 using System.Windows.Forms;
 
@@ -12,43 +14,36 @@ namespace admintool
 {
     public partial class AdminForm : Form
     {
-        private string cs = @"URI=file:C:\\Users\\ars_1\\Documents\\dbForAdminProg\\AdminToolDB.db";
-        SQLiteConnection con;
-        private string cmdText = @"
-SELECT Users.id AS 'id', Users.login AS 'Пользователь', GROUP_CONCAT(Function.name, ', ') AS 'Доступные функции'
-FROM Users
-LEFT JOIN Function_users ON Users.id = Function_users.user
-LEFT JOIN Function ON Function.id = Function_users.function
-WHERE Users.usergroup = 'Dev'
-GROUP BY Users.login;";
+        IAdminService serviceClient;
 
-        public AdminForm()
+        public AdminForm(IAdminService serviceClient)
         {
             InitializeComponent();
-            getDataTable(cmdText);
+            this.serviceClient = serviceClient;
+            GetData();
         }
 
-        private DataTable getDataTable(string cmdText)
+        private void GetData()
         {
-            using (con = new SQLiteConnection(cs))
+            try
             {
-                con.Open();
-
-                using (SQLiteDataAdapter adapter = new SQLiteDataAdapter(cmdText, con))
-                {
-                    DataTable dataTable = new DataTable();
-                    adapter.Fill(dataTable);
-                    dgvUsers.DataSource = dataTable;
-                    dgvUsers.Columns["Доступные функции"].AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
-                    dgvUsers.Columns["id"].AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
-                    dgvUsers.Columns["id"].Frozen = true;
-                    dgvUsers.Columns["Доступные функции"].Frozen = true;
-                    dgvUsers.Columns["Пользователь"].Frozen = true;
-
-                    con.Close();
-                    return dataTable;
-                }
+                dgvUsers.DataSource = serviceClient.GetUsersData();
+                dataGridSetup();
             }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
+
+        private void dataGridSetup()
+        {
+            dgvUsers.Columns["Пользователь"].AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
+            dgvUsers.Columns["Доступные функции"].AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
+            dgvUsers.Columns["id"].AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
+            dgvUsers.Columns["id"].Frozen = true;
+            dgvUsers.Columns["Доступные функции"].Frozen = true;
+            dgvUsers.Columns["Пользователь"].Frozen = true;
         }
 
         private void btnLogout_Click(object sender, EventArgs e)
@@ -66,13 +61,18 @@ GROUP BY Users.login;";
 
         private void OpenAddUserForm()
         {
-            AddUserForm addUserForm = new AddUserForm();
+            AddUserForm addUserForm = new AddUserForm(serviceClient);
             addUserForm.Tag = this;
-            addUserForm.FormClosed += (sender, e) => this.Enabled = true;
-            addUserForm.DataAdded += (sender, e) =>
-                dgvUsers.DataSource = getDataTable(cmdText);
+            addUserForm.FormClosed += AddUserForm_FormClosed;
             addUserForm.Show(this);
+
             this.Enabled = false;
+        }
+
+        private void AddUserForm_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            this.Enabled = true;
+            GetData();
         }
 
         private void btnEdit_Click(object sender, EventArgs e)
@@ -87,10 +87,9 @@ GROUP BY Users.login;";
                 int rowIndex = dgvUsers.SelectedCells[0].RowIndex;
                 string selectedUsername = dgvUsers.Rows[rowIndex].Cells["Пользователь"].Value.ToString();
 
-                EditUserForm editUserForm = new EditUserForm(selectedUsername);
+                EditUserForm editUserForm = new EditUserForm(selectedUsername, serviceClient);
                 editUserForm.Tag = this;
-                editUserForm.FormClosed += (sender, e) => this.Enabled = true;
-                editUserForm.DataUpdated += (sender, e) => dgvUsers.DataSource = getDataTable(cmdText);
+                editUserForm.FormClosed += EditUserForm_FormClosed;
                 editUserForm.Show(this);
                 this.Enabled = false;
             }
@@ -98,6 +97,12 @@ GROUP BY Users.login;";
             {
                 MessageBox.Show("Выберите пользователя для редактирования.");
             }
+        }
+
+        private void EditUserForm_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            this.Enabled = true;
+            GetData();
         }
 
         private void btnRemove_Click(object sender, EventArgs e)
@@ -135,18 +140,7 @@ GROUP BY Users.login;";
                 {
                     int userId = Convert.ToInt32(row.Cells["id"].Value);
 
-                    string deleteQuery = "DELETE FROM Users WHERE id = @UserId";
-                    using (con = new SQLiteConnection(cs))
-                    {
-                        con.Open();
-
-                        using (SQLiteCommand cmd = new SQLiteCommand(deleteQuery, con))
-                        {
-                            cmd.Parameters.AddWithValue("@UserId", userId);
-                            cmd.ExecuteNonQuery();
-                        }
-                        con.Close();
-                    }
+                    serviceClient.DeleteUser(userId);
 
                     dgvUsers.Rows.RemoveAt(i);
                     i--;
@@ -164,19 +158,7 @@ GROUP BY Users.login;";
                 {
                     int userId = Convert.ToInt32(dgvUsers.Rows[rowIndex].Cells["id"].Value);
 
-                    string deleteQuery = "DELETE FROM Users WHERE id = @UserId";
-
-                    using (SQLiteConnection con = new SQLiteConnection(cs))
-                    {
-                        con.Open();
-
-                        using (SQLiteCommand cmd = new SQLiteCommand(deleteQuery, con))
-                        {
-                            cmd.Parameters.AddWithValue("@UserId", userId);
-                            cmd.ExecuteNonQuery();
-                        }
-                        con.Close();
-                    }
+                    serviceClient.DeleteUser(userId);
 
                     dgvUsers.Rows.RemoveAt(rowIndex);
                 }

@@ -35,8 +35,8 @@ namespace admintool
             this.btnEdit = new System.Windows.Forms.Button();
             this.btnRemove = new System.Windows.Forms.Button();
             this.dgvUsers = new System.Windows.Forms.DataGridView();
-            this.chbChoice = new System.Windows.Forms.DataGridViewCheckBoxColumn();
             this.btnReport = new System.Windows.Forms.Button();
+            this.chbChoice = new System.Windows.Forms.DataGridViewCheckBoxColumn();
             ((System.ComponentModel.ISupportInitialize)(this.dgvUsers)).BeginInit();
             this.SuspendLayout();
             // 
@@ -97,17 +97,6 @@ namespace admintool
             this.dgvUsers.TabIndex = 5;
             this.dgvUsers.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvUsers_CellContentClick);
             // 
-            // chbChoice
-            // 
-            this.chbChoice.FalseValue = "False";
-            this.chbChoice.HeaderText = "Выбор";
-            this.chbChoice.MinimumWidth = 8;
-            this.chbChoice.Name = "chbChoice";
-            this.chbChoice.ReadOnly = true;
-            this.chbChoice.Resizable = System.Windows.Forms.DataGridViewTriState.False;
-            this.chbChoice.TrueValue = "True";
-            this.chbChoice.Width = 60;
-            // 
             // btnReport
             // 
             this.btnReport.Location = new System.Drawing.Point(586, 324);
@@ -117,6 +106,17 @@ namespace admintool
             this.btnReport.Text = "Отчет";
             this.btnReport.UseVisualStyleBackColor = true;
             this.btnReport.Click += new System.EventHandler(this.btnReport_Click);
+            // 
+            // chbChoice
+            // 
+            this.chbChoice.FalseValue = "False";
+            this.chbChoice.HeaderText = "Выбор";
+            this.chbChoice.MinimumWidth = 8;
+            this.chbChoice.Name = "chbChoice";
+            this.chbChoice.ReadOnly = true;
+            this.chbChoice.Resizable = System.Windows.Forms.DataGridViewTriState.False;
+            this.chbChoice.TrueValue = "True";
+            this.chbChoice.Width = 70;
             // 
             // AdminForm
             // 
@@ -147,8 +147,8 @@ namespace admintool
         private System.Windows.Forms.Button btnEdit;
         private System.Windows.Forms.Button btnRemove;
         private System.Windows.Forms.DataGridView dgvUsers;
-        private DataGridViewCheckBoxColumn chbChoice;
         private Button btnReport;
+        private DataGridViewCheckBoxColumn chbChoice;
     }
 }
 

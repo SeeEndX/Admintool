@@ -287,7 +287,7 @@
             this.dgvPool.ReadOnly = true;
             this.dgvPool.RowHeadersWidth = 62;
             this.dgvPool.RowTemplate.Height = 28;
-            this.dgvPool.Size = new System.Drawing.Size(726, 198);
+            this.dgvPool.Size = new System.Drawing.Size(726, 206);
             this.dgvPool.TabIndex = 5;
             // 
             // btnAddPool

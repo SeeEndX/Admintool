@@ -3,18 +3,29 @@ using System.Text;
 using System.Windows.Forms;
 using System.Security.Cryptography;
 using System.Data.SQLite;
+using AdminService;
+using System.ServiceModel;
 
 namespace admintool
 {
     public partial class AuthForm : Form
     {
-        private string cs = @"URI=file:C:\\Users\\ars_1\\Documents\\dbForAdminProg\\AdminToolDB.db";
-        SQLiteConnection con;
-        SQLiteCommand cmd;
+        IAdminService serviceClient;
 
         public AuthForm()
         {
             InitializeComponent();
+            InitializeServiceClient();
+        }
+
+        private void InitializeServiceClient()
+        {
+            var binding = new NetTcpBinding();
+            binding.SendTimeout = TimeSpan.FromSeconds(120);
+            ChannelFactory<IAdminService> channelFactory =
+                new ChannelFactory<IAdminService>(binding,
+                new EndpointAddress("net.tcp://localhost:8000/AdminService"));
+            serviceClient = channelFactory.CreateChannel();
         }
 
         private void btnLogin_Click(object sender, EventArgs e)
@@ -24,30 +35,23 @@ namespace admintool
 
         private void Auth()
         {
-
             string login = tbLogin.Text;
             string password = tbPass.Text;
 
-            con = new SQLiteConnection(cs);
-            con.Open();
+            User user = serviceClient.Authenticate(login, password);
 
-            var group = SqlQuery("SELECT [usergroup] FROM Users WHERE login = " +
-                "@Login AND password = @Password", con, login, password);
-            if (group != null)
+            if (user != null)
             {
-                if (group == "Admin")
+                if (user.Group == "Admin")
                 {
-                    AdminForm adminForm = new AdminForm();
+                    AdminForm adminForm = new AdminForm(serviceClient);
                     adminForm.Tag = this;
                     adminForm.Show(this);
                     Hide();
                 }
-                else if (group == "Dev")
+                else if (user.Group == "Dev")
                 {
-                    var user = SqlQuery("SELECT [login] FROM Users WHERE login = " +
-                "@Login AND password = @Password", con, login, password);
-                    
-                    ProgForm progForm = new ProgForm(user);
+                    ProgForm progForm = new ProgForm(user.Login);
                     progForm.Tag = this;
                     progForm.Show(this);
                     Hide();
@@ -57,18 +61,8 @@ namespace admintool
             {
                 MessageBox.Show("Неверные данные!");
             }
-            con.Close();
         }
 
-        private string SqlQuery(string cmdText, SQLiteConnection con, string login, string password)
-        {
-            cmd = new SQLiteCommand(cmdText, con);
-            cmd.Parameters.AddWithValue("@Login", login);
-            cmd.Parameters.AddWithValue("@Password", password);
-            object resultObj = cmd.ExecuteScalar();
-            string result = (resultObj != null) ? resultObj.ToString() : null;
-            return result;
-        }
         private string HashPassword(string password)
         {
             using (SHA256 sha256 = SHA256.Create())
