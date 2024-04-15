@@ -1,4 +1,5 @@
-﻿using Microsoft.Web.Administration;
+﻿using AdminService;
+using Microsoft.Web.Administration;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -18,10 +19,13 @@ namespace admintool
         private int memoryLimit;
         private int intervalMinutes;
         private ManagedPipelineMode mode;
+        IAdminService adminService;
 
-        public EditIISPool(string currentName)
+
+        public EditIISPool(IAdminService adminService, string currentName)
         {
             InitializeComponent();
+            this.adminService = adminService;
             this.currentPoolName = currentName;
             cbMode.SelectedItem = ManagedPipelineMode.Classic;
         }
@@ -37,7 +41,7 @@ namespace admintool
                 intervalMinutes = (numInterval.Value == 0) ? 30 : (int)numInterval.Value;
                 mode = (cbMode.Text == "Classic") ? ManagedPipelineMode.Classic : ManagedPipelineMode.Integrated;
 
-                IISManager.ModifyPool(currentPoolName, newPoolName, mode, memoryLimit, intervalMinutes);
+                adminService.ModifyPool(currentPoolName, newPoolName, mode, memoryLimit, intervalMinutes);
                 Close();
             }
         }

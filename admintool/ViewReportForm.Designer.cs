@@ -31,6 +31,7 @@
             this.label1 = new System.Windows.Forms.Label();
             this.btnLogout = new System.Windows.Forms.Button();
             this.rtbReports = new System.Windows.Forms.RichTextBox();
+            this.label2 = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // label1
@@ -63,11 +64,22 @@
             this.rtbReports.TabIndex = 3;
             this.rtbReports.Text = "";
             // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold);
+            this.label2.Location = new System.Drawing.Point(275, 13);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(70, 25);
+            this.label2.TabIndex = 5;
+            this.label2.Text = "label2";
+            // 
             // ViewReportForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(495, 393);
+            this.Controls.Add(this.label2);
             this.Controls.Add(this.rtbReports);
             this.Controls.Add(this.btnLogout);
             this.Controls.Add(this.label1);
@@ -84,5 +96,6 @@
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Button btnLogout;
         private System.Windows.Forms.RichTextBox rtbReports;
+        private System.Windows.Forms.Label label2;
     }
 }

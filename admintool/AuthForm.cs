@@ -51,7 +51,7 @@ namespace admintool
                 }
                 else if (user.Group == "Dev")
                 {
-                    ProgForm progForm = new ProgForm(user.Login);
+                    ProgForm progForm = new ProgForm(serviceClient,user.Login);
                     progForm.Tag = this;
                     progForm.Show(this);
                     Hide();

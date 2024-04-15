@@ -13,11 +13,13 @@ namespace admintool
         private Dictionary<string, Action> functionDictionary = new Dictionary<string, Action>();
         Dictionary<string, TabPage> functionTabs;
 
+        IAdminService adminService;
         IISManager iisManager = new IISManager();
 
-        public ProgForm(string user)
+        public ProgForm(IAdminService adminService, string user)
         {
             InitializeComponent();
+            this.adminService = adminService;
             lbHello.Text += ", "+user+"!";
             currentUser = user;
             InitData();
@@ -26,7 +28,7 @@ namespace admintool
         private void InitData()
         {
             InitializeTabs();
-            FunctionExecutor executor = new FunctionExecutor(functionDictionary);
+            //FunctionExecutor executor = new FunctionExecutor(functionDictionary);
             dgvSitesInit();
             dgvPoolInit();
             if (tabManageSite != null)
@@ -75,13 +77,20 @@ namespace admintool
 
         private void UpdateSitesDataGridView()
         {
-            List<IISManager.SiteInfo> listOfSites = iisManager.GetListOfSites();
+            List<IISManager.SiteInfo> listOfSites = adminService.GetListOfSites();
 
-            dgvSites.Rows.Clear();
-
-            foreach (IISManager.SiteInfo site in listOfSites)
+            if (listOfSites == null || listOfSites.Count == 0)
             {
-                dgvSites.Rows.Add(site.Name, site.State, site.Bindings);
+                MessageBox.Show("Нет ничего");
+            }
+            else
+            {
+                dgvSites.Rows.Clear();
+
+                foreach (IISManager.SiteInfo site in listOfSites)
+                {
+                    dgvSites.Rows.Add(site.Name, site.State, site.Bindings);
+                }
             }
         }
 
@@ -110,83 +119,6 @@ namespace admintool
         }
 
 
-        /*private List<ActionItem> GetFunctionsForUser(string user)
-        {
-            List<ActionItem> functions = new List<ActionItem>();
-
-            using (con = new SQLiteConnection(cs))
-            {
-                con.Open();
-
-                string query = @"
-            SELECT f.name
-            FROM Function f
-            JOIN Function_users fu ON f.id = fu.function
-            JOIN Users u ON u.id = fu.user
-            WHERE u.login = @User;";
-
-                using (cmd = new SQLiteCommand(query, con))
-                {
-                    cmd.Parameters.AddWithValue("@User", user);
-
-                    using (SQLiteDataReader reader = cmd.ExecuteReader())
-                    {
-                        while (reader.Read())
-                        {
-                            string functionNameFromDb = reader.GetString(0);
-                            Action action = () => executor.ExecuteMethodByName(functionNameFromDb);
-                            functions.Add(new ActionItem(functionNameFromDb, action));
-                        }
-                    }
-                }
-            }
-
-            return functions;
-        }*/
-
-        /*private void AddReport(string description)
-        {
-            using (SQLiteConnection con = new SQLiteConnection(cs))
-            {
-                con.Open();
-
-                string insertReportQuery = "INSERT INTO Reports (user, description, time) VALUES (@UserId, @Description, @Time);";
-                using (SQLiteCommand insertReportCmd = new SQLiteCommand(insertReportQuery, con))
-                {
-                    insertReportCmd.Parameters.AddWithValue("@UserId", GetUserIdByUsername(currentUser));
-                    insertReportCmd.Parameters.AddWithValue("@Description", description);
-                    insertReportCmd.Parameters.AddWithValue("@Time", DateTime.Now.ToString());
-
-                    insertReportCmd.ExecuteNonQuery();
-                }
-            }
-        }*/
-
-        /*private int GetUserIdByUsername(string username)
-        {
-            int userId = -1;
-
-            using (SQLiteConnection con = new SQLiteConnection(cs))
-            {
-                con.Open();
-
-                string query = "SELECT id FROM Users WHERE login = @Username;";
-
-                using (SQLiteCommand cmd = new SQLiteCommand(query, con))
-                {
-                    cmd.Parameters.AddWithValue("@Username", username);
-
-                    object result = cmd.ExecuteScalar();
-                    if (result != null && int.TryParse(result.ToString(), out userId))
-                    {
-                        return userId;
-                    }
-                }
-            }
-
-            return userId;
-        }*/
-
         private void btnExit_Click(object sender, EventArgs e)
         {
             AuthForm auth = new AuthForm();
@@ -207,12 +139,12 @@ namespace admintool
 
         private void ShowAddingIISWebSite()
         {
-            AddIISWebSite addIISWebSite = new AddIISWebSite();
+            AddIISWebSite addIISWebSite = new AddIISWebSite(adminService);
             addIISWebSite.Tag = this;
             addIISWebSite.FormClosed += (sender, e) => {
                 this.Enabled = true;
                 UpdateSitesDataGridView();
-                iisManager.AddReport(currentUser, "Добавлен сайт на веб-сервер Microsoft IIS Server");
+                adminService.AddReport(currentUser, "Добавлен сайт на веб-сервер Microsoft IIS Server");
             };
             addIISWebSite.Show(this);
             this.Enabled = false;
@@ -234,13 +166,13 @@ namespace admintool
 
         private void ShowEditingIISWebSite(string currentName)
         {
-            EditIISWebSite editIISWebSite = new EditIISWebSite(currentName);
+            EditIISWebSite editIISWebSite = new EditIISWebSite(adminService,currentName);
             editIISWebSite.Tag = this;
             editIISWebSite.FormClosed += (sender, e) =>
             {
                 this.Enabled = true;
                 UpdateSitesDataGridView();
-                iisManager.AddReport(currentUser, $"Изменен сайт {currentName} на веб-сервере Microsoft IIS"); //eventHandler на будущее
+                adminService.AddReport(currentUser, $"Изменен сайт {currentName} на веб-сервере Microsoft IIS"); //eventHandler на будущее
             };
             editIISWebSite.Show(this);
             this.Enabled = false;
@@ -259,9 +191,9 @@ namespace admintool
                                                       MessageBoxIcon.Question);
                 if (result == DialogResult.Yes)
                 {
-                    iisManager.DeleteWebsite(selectedSiteName);
+                    adminService.DeleteWebsite(selectedSiteName);
                     UpdateSitesDataGridView();
-                    iisManager.AddReport(currentUser, $"С веб-сервера Microsoft IIS был удален сайт {selectedSiteName}");
+                    adminService.AddReport(currentUser, $"С веб-сервера Microsoft IIS был удален сайт {selectedSiteName}");
                 }
             }
             else
@@ -280,14 +212,14 @@ namespace admintool
 
                 if (selectedSiteState == "Stopped")
                 {
-                    iisManager.StartSite(selectedSiteName);
+                    adminService.StartSite(selectedSiteName);
                     UpdateSitesDataGridView();
-                    iisManager.AddReport(currentUser, $"На веб-сервере Microsoft IIS был запущен сайт {selectedSiteName}");
+                    adminService.AddReport(currentUser, $"На веб-сервере Microsoft IIS был запущен сайт {selectedSiteName}");
                 }
                 else
                 {
                     MessageBox.Show("Сайт уже запущен или в процессе запуска.", "Предупреждение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    iisManager.AddReport(currentUser, $"На веб-сервере Microsoft IIS была осуществленна попытка запустить сайт {selectedSiteName}, который уже запущен");
+                    adminService.AddReport(currentUser, $"На веб-сервере Microsoft IIS была осуществленна попытка запустить сайт {selectedSiteName}, который уже запущен");
                 }
             }
             else
@@ -306,14 +238,14 @@ namespace admintool
 
                 if (selectedSiteState == "Started")
                 {
-                    iisManager.StopSite(selectedSiteName);
+                    adminService.StopSite(selectedSiteName);
                     UpdateSitesDataGridView();
-                    iisManager.AddReport(currentUser, $"На веб-сервере Microsoft IIS был остановлен сайт {selectedSiteName}");
+                    adminService.AddReport(currentUser, $"На веб-сервере Microsoft IIS был остановлен сайт {selectedSiteName}");
                 }
                 else
                 {
                     MessageBox.Show("Сайт уже остановлен или в процессе остановки.", "Предупреждение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    iisManager.AddReport(currentUser, $"На веб-сервере Microsoft IIS была осуществленна попытка остановить сайт {selectedSiteName}, который уже остановлен");
+                    adminService.AddReport(currentUser, $"На веб-сервере Microsoft IIS была осуществленна попытка остановить сайт {selectedSiteName}, который уже остановлен");
                 }
             }
             else
@@ -345,7 +277,7 @@ namespace admintool
 
         private void UpdatePoolDataGridView()
         {
-            List<IISManager.AppPoolInfo> listOfAppPools = iisManager.GetListOfAppPools();
+            List<IISManager.AppPoolInfo> listOfAppPools = adminService.GetListOfAppPools();
 
             dgvPool.Rows.Clear();
 
@@ -357,13 +289,13 @@ namespace admintool
 
         private void ShowAddingPool()
         {
-            AddIISPool addIISPool = new AddIISPool();
+            AddIISPool addIISPool = new AddIISPool(adminService);
             addIISPool.Tag = this;
             addIISPool.FormClosed += (sender, e) =>
             {
                 this.Enabled = true;
                 UpdatePoolDataGridView();
-                iisManager.AddReport(currentUser, $"На веб-сервере Microsoft IIS был добавлен пул"); //eventHandler на будущее
+                adminService.AddReport(currentUser, $"На веб-сервере Microsoft IIS был добавлен пул"); //eventHandler на будущее
             };
             addIISPool.Show(this);
             this.Enabled = false;
@@ -382,9 +314,9 @@ namespace admintool
                                                       MessageBoxIcon.Question);
                 if (result == DialogResult.Yes)
                 {
-                    iisManager.DeletePool(selectedPoolName);
+                    adminService.DeletePool(selectedPoolName);
                     UpdatePoolDataGridView();
-                    iisManager.AddReport(currentUser, $"С веб-сервера Microsoft IIS был удален пул приложений {selectedPoolName}");
+                    adminService.AddReport(currentUser, $"С веб-сервера Microsoft IIS был удален пул приложений {selectedPoolName}");
                 }
             }
             else
@@ -395,13 +327,13 @@ namespace admintool
 
         private void ShowEditingPool(string currentName)
         {
-            EditIISPool editIISPool = new EditIISPool(currentName);
+            EditIISPool editIISPool = new EditIISPool(adminService, currentName);
             editIISPool.Tag = this;
             editIISPool.FormClosed += (sender, e) =>
             {
                 this.Enabled = true;
                 UpdatePoolDataGridView();
-                iisManager.AddReport(currentUser, $"Изменен пул приложений {currentName} на веб-сервере Microsoft IIS"); //eventHandler на будущее
+                adminService.AddReport(currentUser, $"Изменен пул приложений {currentName} на веб-сервере Microsoft IIS"); //eventHandler на будущее
             };
             editIISPool.Show(this);
             this.Enabled = false;
@@ -431,14 +363,14 @@ namespace admintool
 
                 if (selectedPoolState.Contains("Stopped"))
                 {
-                    iisManager.StartAppPool(selectedPoolName);
+                    adminService.StartAppPool(selectedPoolName);
                     UpdatePoolDataGridView();
-                    iisManager.AddReport(currentUser, $"На веб-сервере Microsoft IIS был запущен пул приложений {selectedPoolName}");
+                    adminService.AddReport(currentUser, $"На веб-сервере Microsoft IIS был запущен пул приложений {selectedPoolName}");
                 }
                 else
                 {
                     MessageBox.Show("Пул уже запущен или в процессе запуска.", "Предупреждение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    iisManager.AddReport(currentUser, $"На веб-сервере Microsoft IIS была осуществленна попытка запустить пул приложений {selectedPoolName}, который уже запущен");
+                    adminService.AddReport(currentUser, $"На веб-сервере Microsoft IIS была осуществленна попытка запустить пул приложений {selectedPoolName}, который уже запущен");
                 }
             }
             else
@@ -457,14 +389,14 @@ namespace admintool
 
                 if (selectedPoolState.Contains("Started"))
                 {
-                    iisManager.StopAppPool(selectedPoolName);
+                    adminService.StopAppPool(selectedPoolName);
                     UpdatePoolDataGridView();
-                    iisManager.AddReport(currentUser, $"На веб-сервере Microsoft IIS был остановлен пул {selectedPoolName}");
+                    adminService.AddReport(currentUser, $"На веб-сервере Microsoft IIS был остановлен пул {selectedPoolName}");
                 }
                 else
                 {
                     MessageBox.Show("Пул уже остановлен или в процессе остановки.", "Предупреждение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    iisManager.AddReport(currentUser, $"На веб-сервере Microsoft IIS была осуществленна попытка остановить пул {selectedPoolName}, который уже остановлен");
+                    adminService.AddReport(currentUser, $"На веб-сервере Microsoft IIS была осуществленна попытка остановить пул {selectedPoolName}, который уже остановлен");
                 }
             }
             else

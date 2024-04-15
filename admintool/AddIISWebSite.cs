@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AdminService;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -15,9 +16,11 @@ namespace admintool
         private string path;
         private string name;
         private int port;
+        IAdminService adminService;
 
-        public AddIISWebSite()
+        public AddIISWebSite(IAdminService adminService)
         {
+            this.adminService = adminService;
             InitializeComponent();
         }
 
@@ -33,7 +36,7 @@ namespace admintool
                 name = tbName.Text;
                 port = ((int)numPort.Value);
 
-                IISManager.CreateWebsite(name, path, port);
+                adminService.CreateWebsite(name, path, port);
                 Close();
             }
         }

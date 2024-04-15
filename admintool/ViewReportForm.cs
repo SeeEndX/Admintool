@@ -1,63 +1,42 @@
 ﻿using System;
 using System.Windows.Forms;
 using System.Data.SQLite;
+using System.Collections.Generic;
+using AdminService;
+using System.Drawing;
 
 namespace admintool
 {
     public partial class ViewReportForm : Form
     {
-        private string cs = @"URI=file:C:\\Users\\ars_1\\Documents\\dbForAdminProg\\AdminToolDB.db";
-        SQLiteConnection con;
-        SQLiteCommand cmd;
-
         private int user;
-        private string username;
+        IAdminService serviceClient;
 
-        public ViewReportForm(int userId)
+        public ViewReportForm(IAdminService serviceClient, int userId)
         {
             InitializeComponent();
             user = userId;
-            GetReportsForUser(user);
+            this.serviceClient = serviceClient;
+            GetReports(user);
         }
 
-        private void GetReportsForUser(int user)
+        private void GetReports(int user)
         {
-            try
+            (List<string> reports, string username) = serviceClient.GetReportsForUser(user);
+            if (reports.Count > 0)
             {
-                using (con = new SQLiteConnection(cs))
+                label1.Text = "Отчеты для пользователя ";
+                label2.Text = username;
+                foreach (string reportEntry in reports)
                 {
-                    con.Open();
-
-                    string query = @"
-                SELECT U.login, R.description, R.time
-                FROM Reports R
-                JOIN Users U ON R.user = U.id
-                WHERE R.user = @UserId;";
-
-                    using (cmd = new SQLiteCommand(query, con))
-                    {
-                        cmd.Parameters.AddWithValue("@UserId", user);
-
-                        using (SQLiteDataReader reader = cmd.ExecuteReader())
-                        {
-                            while (reader.Read())
-                            {
-                                string login = reader.GetString(0);
-                                string description = reader.GetString(1);
-                                string time = reader.GetString(2);
-                                username = login;
-                                string reportEntry = $"{description}\n в {time}\n\n";
-                                rtbReports.Text += reportEntry;
-                            }
-                        }
-                    }
+                    rtbReports.AppendText(reportEntry);
                 }
             }
-            catch (Exception ex)
+            else
             {
-                MessageBox.Show($"Ошибка при получении отчетов для пользователя: {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                label1.Text = $"Отчеты отсутствуют у ";
+                label2.Text = username;
             }
-            label1.Text += username;
         }
 
         private void btnLogout_Click(object sender, EventArgs e)
