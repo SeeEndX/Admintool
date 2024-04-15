@@ -8,7 +8,7 @@ namespace admintool
 {
     public class IISManager
     {
-        public class SiteInfo
+        /*public class SiteInfo
         {
             public string Name { get; set; }
             public string State { get; set; }
@@ -323,6 +323,6 @@ namespace admintool
             {
                 MessageBox.Show($"Ошибка при запуске пула приложений: {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-        }
+        }*/
     }
 }
